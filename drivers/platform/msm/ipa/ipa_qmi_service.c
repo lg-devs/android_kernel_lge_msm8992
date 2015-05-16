@@ -37,6 +37,11 @@
 
 #define QMI_SEND_REQ_TIMEOUT_MS 60000
 
+/* 2015-03-10, LGE, secheol.pyo@lge.com,
+ * fixed modem crash which occured due to ipa_qmi_ctx kzalloc failure under oom.
+ */
+#define LGE_FIXED_MODEM_CRASH_BY_OOM
+
 static struct qmi_handle *ipa_svc_handle;
 static void ipa_a5_svc_recv_msg(struct work_struct *work);
 static DECLARE_DELAYED_WORK(work_recv_msg, ipa_a5_svc_recv_msg);
@@ -49,7 +54,9 @@ static struct work_struct ipa_qmi_service_init_work;
 static bool is_load_uc;
 static uint32_t ipa_wan_platform;
 struct ipa_qmi_context *ipa_qmi_ctx;
-
+#ifdef LGE_FIXED_MODEM_CRASH_BY_OOM
+struct ipa_qmi_context s_ipa_qmi_ctx;
+#endif
 /* QMI A5 service */
 
 static struct msg_desc ipa_indication_reg_req_desc = {
@@ -792,7 +799,12 @@ static void ipa_qmi_service_init_worker(struct work_struct *work)
 	IPAWANDBG("IPA A7 QMI init OK :>>>>\n");
 
 	/* start the QMI msg cache */
+#ifdef LGE_FIXED_MODEM_CRASH_BY_OOM
+	memset(&s_ipa_qmi_ctx, 0, sizeof(struct ipa_qmi_context));
+	ipa_qmi_ctx = &s_ipa_qmi_ctx;
+#else /* Qualcomm Original */
 	ipa_qmi_ctx = vzalloc(sizeof(*ipa_qmi_ctx));
+#endif
 	if (!ipa_qmi_ctx) {
 		IPAWANERR(":vzalloc err.\n");
 		return;
@@ -801,8 +813,12 @@ static void ipa_qmi_service_init_worker(struct work_struct *work)
 	ipa_svc_workqueue = create_singlethread_workqueue("ipa_A7_svc");
 	if (!ipa_svc_workqueue) {
 		IPAWANERR("Creating ipa_A7_svc workqueue failed\n");
+#ifdef LGE_FIXED_MODEM_CRASH_BY_OOM
+               ipa_qmi_ctx = NULL;
+#else /* Qualcomm Original */
 		vfree(ipa_qmi_ctx);
 		ipa_qmi_ctx = NULL;
+#endif
 		return;
 	}
 
@@ -866,8 +882,12 @@ destroy_qmi_handle:
 destroy_ipa_A7_svc_wq:
 	destroy_workqueue(ipa_svc_workqueue);
 	ipa_svc_workqueue = NULL;
+#ifdef LGE_FIXED_MODEM_CRASH_BY_OOM
+       ipa_qmi_ctx = NULL;
+#else /* Qualcomm Original */
 	vfree(ipa_qmi_ctx);
 	ipa_qmi_ctx = NULL;
+#endif
 	return;
 }
 
@@ -933,10 +953,17 @@ void ipa_qmi_service_exit(void)
 	}
 
 	/* clean the QMI msg cache */
+#ifdef LGE_FIXED_MODEM_CRASH_BY_OOM
+	if (ipa_qmi_ctx != NULL) {
+		ipa_qmi_ctx = NULL;
+	}
+#else /* Qualcomm Original */
 	if (ipa_qmi_ctx != NULL) {
 		vfree(ipa_qmi_ctx);
 		ipa_qmi_ctx = NULL;
 	}
+#endif
+
 	ipa_svc_handle = 0;
 	qmi_modem_init_fin = false;
 	qmi_indication_fin = false;

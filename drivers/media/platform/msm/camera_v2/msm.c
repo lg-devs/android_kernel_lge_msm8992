@@ -29,7 +29,11 @@
 #include "msm_vb2.h"
 #include "msm_sd.h"
 #include <media/msmb_generic_buf_mgr.h>
-
+/* LGE_CHANGE_S, camera stability task, added  msm-config debugfs*/
+#include <linux/debugfs.h>
+#define LGE_DEBUG_DISABLE_POSTEVENT_TIMEOUT 1
+#define LGE_DEBUG_PANIC_ON_POSTEVENT_TIMEOUT 2
+/* LGE_CHANGE_E, camera stability task, added  msm-config debugfs*/
 
 static struct v4l2_device *msm_v4l2_dev;
 static struct list_head    ordered_sd_list;
@@ -390,6 +394,8 @@ int msm_create_command_ack_q(unsigned int session_id, unsigned int stream_id)
 				__func__, __LINE__);
 		return -EINVAL;
 	}
+	pr_err("%s: session_id = %d, stream_id = %d\n", __func__,session_id,stream_id); /*LGE_CHANGE, add the mutex to fix the poison overwritten, 2015-03-31, freeso.kim@lge.com*/
+	
 	mutex_lock(&session->lock);
 	cmd_ack = kzalloc(sizeof(*cmd_ack), GFP_KERNEL);
 	if (!cmd_ack) {
@@ -420,6 +426,9 @@ void msm_delete_command_ack_q(unsigned int session_id, unsigned int stream_id)
 		list, __msm_queue_find_session, &session_id);
 	if (!session)
 		return;
+
+	pr_err("%s: session_id = %d, stream_id = %d\n", __func__,session_id,stream_id); /*LGE_CHANGE, add the mutex to fix the poison overwritten, 2015-03-31, freeso.kim@lge.com*/
+
 	mutex_lock(&session->lock);
 
 	cmd_ack = msm_queue_find(&session->command_ack_q,
@@ -508,6 +517,8 @@ int msm_destroy_session(unsigned int session_id)
 	struct v4l2_subdev *buf_mgr_subdev;
 	struct msm_sd_close_ioctl session_info;
 
+	pr_err("%s: session_id = %d\n", __func__,session_id); /*LGE_CHANGE, add the mutex to fix the poison overwritten, 2015-03-31, freeso.kim@lge.com*/
+	
 	session = msm_queue_find(msm_session_q, struct msm_session,
 		list, __msm_queue_find_session, &session_id);
 	if (!session)
@@ -736,27 +747,37 @@ int msm_post_event(struct v4l2_event *event, int timeout)
 				__func__, __LINE__);
 		return rc;
 	}
-
+/* LGE_CHANGE_S, camera stability task, added  msm-config debugfs*/
+	if(vdev->debug == LGE_DEBUG_DISABLE_POSTEVENT_TIMEOUT) {
+		msm_print_event_error(event);
+		wait_for_completion(&cmd_ack->wait_complete);
+	} else {
 	/* should wait on session based condition */
-	rc = wait_for_completion_timeout(&cmd_ack->wait_complete,
-			msecs_to_jiffies(timeout));
+		rc = wait_for_completion_timeout(&cmd_ack->wait_complete,
+				msecs_to_jiffies(timeout));
 
-
-	if (list_empty_careful(&cmd_ack->command_q.list)) {
-		if (!rc) {
-			pr_err("%s: Timed out\n", __func__);
-			msm_print_event_error(event);
-			mutex_unlock(&session->lock);
-			return -ETIMEDOUT;
-		} else {
-			pr_err("%s: Error: No timeout but list empty!",
-					__func__);
-			msm_print_event_error(event);
-			mutex_unlock(&session->lock);
-			return -EINVAL;
+		if (list_empty_careful(&cmd_ack->command_q.list)) {
+			if (!rc) {
+				pr_err("%s: Timed out\n", __func__);
+				msm_print_event_error(event);
+				mutex_unlock(&session->lock);
+				BUG_ON(vdev->debug == LGE_DEBUG_PANIC_ON_POSTEVENT_TIMEOUT);
+/* LGE_CHANGE_S, Camera Recovery Code, 2014-12-25, yousung.kang@lge.com */
+			    pr_err("%s: ===== Camera Recovery Start! ===== \n", __func__);
+			    dump_stack();
+			    send_sig(SIGKILL, current, 0);
+/* LGE_CHANGE_E, Camera Recovery Code, 2014-12-25, yousung.kang@lge.com */
+				return -ETIMEDOUT;
+			} else {
+				pr_err("%s: Error: No timeout but list empty!",
+						__func__);
+				msm_print_event_error(event);
+				mutex_unlock(&session->lock);
+				return -EINVAL;
+			}
 		}
 	}
-
+/* LGE_CHANGE_E, camera stability task, added  msm-config debugfs*/
 	cmd = msm_dequeue(&cmd_ack->command_q,
 		struct msm_command, list);
 	if (!cmd) {
@@ -993,7 +1014,43 @@ static void msm_sd_notify(struct v4l2_subdev *sd,
 		break;
 	}
 }
+/* LGE_CHANGE_S, camera stability task, added  msm-config debugfs*/
+static int msm_config_debugfs_get(void *data, u64 *val)
+{
+      struct video_device *vdev = (struct video_device *)data;
 
+       *val = vdev->debug;
+       return 0;
+}
+
+static int msm_config_debugfs_set(void  *data, u64 val)
+{
+       struct video_device *vdev = (struct video_device *)data;
+
+       pr_err("%s: vdev(%p) changed from %d to %d \n", __func__, vdev,vdev->debug, (int)val);
+       vdev->debug=val;
+       return 0;
+}
+
+DEFINE_SIMPLE_ATTRIBUTE(msm_config_debugfs, msm_config_debugfs_get,
+       msm_config_debugfs_set, "%llu\n");
+
+static int msm_config_create_debugfs(struct video_device *ctrl_t)
+{
+	struct dentry *debugfs_base;
+	char dirname[32] = {0};
+
+	snprintf(dirname, sizeof(dirname), "msm-config");
+	debugfs_base = debugfs_create_dir(dirname, NULL);
+	if (!debugfs_base)
+		return -ENOMEM;
+	if (!debugfs_create_file("disable_timeout", S_IRUGO | S_IWUSR, debugfs_base,
+		ctrl_t, &msm_config_debugfs))
+		return -ENOMEM;
+
+	return 0;
+}
+/* LGE_CHANGE_E, camera stability task, added debugfs for msm-config*/
 static int msm_probe(struct platform_device *pdev)
 {
 	struct msm_video_device *pvdev;
@@ -1072,7 +1129,10 @@ static int msm_probe(struct platform_device *pdev)
 	msm_session_q = kzalloc(sizeof(*msm_session_q), GFP_KERNEL);
 	if (WARN_ON(!msm_session_q))
 		goto v4l2_fail;
-
+/* LGE_CHANGE_S, camera stability task, added  msm-config debugfs*/
+	msm_config_create_debugfs(pvdev->vdev);
+	pvdev->vdev->debug = 0;
+/* LGE_CHANGE_E, camera stability task, added  msm-config debugfs*/
 	msm_init_queue(msm_session_q);
 	spin_lock_init(&msm_eventq_lock);
 	spin_lock_init(&msm_pid_lock);

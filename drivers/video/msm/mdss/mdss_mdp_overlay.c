@@ -59,6 +59,221 @@ static int __vsync_set_vsync_handler(struct msm_fb_data_type *mfd);
 static int mdss_mdp_update_panel_info(struct msm_fb_data_type *mfd,
 		int mode, int dest_ctrl);
 
+#ifdef CONFIG_LGE_PARTIAL_UPDATE
+static int lge_disable_partial_update = 0;
+void mdss_mdp_set_disable_partail_update(int flags);
+void mdss_mdp_clear_disable_partail_update(int flags);
+int mdss_mdp_get_disable_partail_update(void);
+
+void mdss_mdp_set_disable_partail_update(int flags)
+{
+	lge_disable_partial_update |= flags;
+}
+
+void mdss_mdp_clear_disable_partail_update(int flags)
+{
+	lge_disable_partial_update &= ~flags;
+}
+
+int mdss_mdp_get_disable_partail_update(void)
+{
+	return lge_disable_partial_update;
+}
+#endif
+
+#define DEFAULT_REG_LENGTH 0x200
+#define DEFAULT_MDP_REG_LENGTH 0x1000
+void mdss_reg_dump(char __iomem *base, int len)
+{
+	char *addr;
+	u32 x0, x4, x8, xc;
+	int i;
+
+	addr = base;
+
+	if(addr==NULL) {
+		pr_err("mdss_reg_dump - NULL address\n");
+		return;
+	}
+
+	if (len % 16)
+		len += 16;
+	len /= 16;
+
+	mdss_mdp_clk_ctrl(MDP_BLOCK_POWER_ON);
+	for (i = 0; i < len; i++) {
+		x0 = readl_relaxed(addr+0x0);
+		x4 = readl_relaxed(addr+0x4);
+		x8 = readl_relaxed(addr+0x8);
+		xc = readl_relaxed(addr+0xc);
+		pr_info("%p : %08x %08x %08x %08x\n", addr, x0, x4, x8, xc);
+		addr += 16;
+	}
+	pr_info("\n");
+	mdss_mdp_clk_ctrl(MDP_BLOCK_POWER_OFF);
+}
+
+#if defined(CONFIG_LGE_MIPI_P1_INCELL_QHD_CMD_PANEL)
+extern int panel_not_connected;
+extern unsigned int reg_dump_enable;
+#endif
+
+void dump_mdss_reg(void){
+	struct mdss_data_type *mdata = mdss_res;
+
+		int i;
+		struct mdss_mdp_pipe *pbase;
+		struct mdss_mdp_mixer *mint_base;
+		struct mdss_mdp_ctl *ctl_base;
+		u32 len = 0 ;
+
+#if defined(CONFIG_LGE_MIPI_P1_INCELL_QHD_CMD_PANEL)
+		if(!reg_dump_enable)
+			return;
+#endif
+#if defined(CONFIG_LGE_MIPI_P1_INCELL_QHD_CMD_PANEL)
+		if(panel_not_connected) {
+			pr_debug("[%s] reg-dump skipped \n", __func__);
+			return;
+		}
+#endif
+
+		pr_err("+ + + + + + ========== MDSS DUMP ========= + + + + + +\n");
+		pr_info("============ MDSS BASE [Start:0x%p Len :0x%x]=============\n",mdata->mdp_base,DEFAULT_MDP_REG_LENGTH);
+		mdss_reg_dump(mdata->mdp_base,DEFAULT_MDP_REG_LENGTH/2);
+
+		pbase = mdata->vig_pipes;
+		if(mdata->nvig_pipes>1){
+			pbase++;
+			len=(int)(pbase->base - mdata->vig_pipes->base);
+		}else
+			len = DEFAULT_REG_LENGTH;
+
+//ctl
+		ctl_base = mdata->ctl_off;
+		if(mdata->nctl>1){
+			ctl_base++;
+			len=(int)(ctl_base->base - mdata->ctl_off->base);
+		}else
+			len = DEFAULT_REG_LENGTH;
+
+		ctl_base = mdata->ctl_off;
+		for(i=0; i<mdata->nctl; i++){
+			pr_info("============ CTL_%d[Start:0x%p Len :0x%x]=============\n",i,ctl_base->base,len);
+
+			mdss_reg_dump(ctl_base->base,len/2);
+			ctl_base ++;
+		}
+//pipes
+		pbase = mdata->vig_pipes;
+		if(mdata->nvig_pipes>1){
+			pbase++;
+			len=(int)(pbase->base - mdata->vig_pipes->base);
+		}else
+			len = DEFAULT_REG_LENGTH;
+
+
+		pbase = mdata->vig_pipes;
+		for(i=0; i<mdata->nvig_pipes; i++){
+			pr_info("============ VG%d[Start:0x%p Len :0x%x]=============\n",i,pbase->base,len);
+			mdss_reg_dump(pbase->base,len/4);
+			pbase ++;
+		}
+
+		pbase = mdata->rgb_pipes;
+		if(mdata->nrgb_pipes>1){
+			pbase++;
+			len=(int)(pbase->base - mdata->rgb_pipes->base);
+		}else
+			len = DEFAULT_REG_LENGTH;
+
+
+		pbase = mdata->rgb_pipes;
+		for(i=0; i<mdata->nrgb_pipes; i++){
+			pr_info("============ RGB%d[Start:0x%p Len :0x%x]=============\n",i,pbase->base,len);
+
+			mdss_reg_dump(pbase->base,len/4);
+			pbase ++;
+		}
+
+		pbase = mdata->dma_pipes;
+		if(mdata->ndma_pipes>1){
+			pbase++;
+			len=(int)(pbase->base - mdata->dma_pipes->base);
+		}else
+			len = DEFAULT_REG_LENGTH;
+
+		pbase = mdata->dma_pipes;
+		for(i=0; i<mdata->ndma_pipes; i++){
+
+			pr_info("============ DMA%d[Start:0x%p Len :0x%x]=============\n",i,pbase->base,len);
+			mdss_reg_dump(pbase->base,len/4);
+
+			pbase ++;
+		}
+
+//mixer intf
+		mint_base = mdata->mixer_intf;
+		if(mdata->nmixers_intf>1){
+			mint_base++;
+			len=(int)(mint_base->base - mdata->mixer_intf->base);
+		}else
+			len = DEFAULT_REG_LENGTH;
+
+		mint_base = mdata->mixer_intf;
+		for(i=0; i<mdata->nmixers_intf; i++){
+			pr_info("============ MIXER_INF%d[Start:0x%p Len :0x%x]=============\n",i,mint_base->base,len);
+			mdss_reg_dump(mint_base->base,len/4);
+			mint_base ++;
+		}
+
+		mint_base = mdata->mixer_intf;
+		if(mdata->nmixers_intf>1){
+			mint_base++;
+			len=(int)(mint_base->dspp_base - mdata->mixer_intf->dspp_base);
+		}else
+			len = DEFAULT_REG_LENGTH;
+
+		mint_base = mdata->mixer_intf;
+		for(i=0; i<mdata->ndspp; i++){
+			pr_info("============ INF_DSPP%d[Start:0x%p Len :0x%x]=============\n",i,mint_base->dspp_base,len);
+
+			mdss_reg_dump(mint_base->dspp_base,DEFAULT_REG_LENGTH);
+			mint_base ++;
+		}
+		mint_base = mdata->mixer_intf;
+		if(mdata->nmixers_intf>1){
+			mint_base++;
+			len=(int)(mint_base->pingpong_base - mdata->mixer_intf->pingpong_base);
+		}else
+			len = DEFAULT_REG_LENGTH;
+
+		mint_base = mdata->mixer_intf;
+		for(i=0; i<mdata->nmixers_intf; i++){
+			pr_info("============ INF_PINGPONG%d[Start:0x%p Len :0x%x]=============\n",i,mint_base->pingpong_base,len);
+
+			mdss_reg_dump(mint_base->pingpong_base,DEFAULT_REG_LENGTH);
+			mint_base ++;
+		}
+
+		ctl_base = mdata->ctl_off;
+		if(mdata->nctl>1){
+			ctl_base++;
+			len=(int)(ctl_base->wb_base - mdata->ctl_off->wb_base);
+		}else
+			len = DEFAULT_REG_LENGTH;
+
+		ctl_base = mdata->ctl_off;
+		for(i=0; i<mdata->nctl; i++){
+			pr_info("============ CTL_WB_%d[Start:0x%p Len :0x%x]=============\n",i,ctl_base->wb_base,len);
+
+			mdss_reg_dump(ctl_base->wb_base,DEFAULT_REG_LENGTH);
+			ctl_base ++;
+		}
+		pr_err("- - - - - - ========== MDSS DUMP ========= - - - - - - \n");
+
+}
+
 static inline bool is_ov_right_blend(struct mdp_rect *left_blend,
 	struct mdp_rect *right_blend, u32 left_lm_w)
 {
@@ -2731,7 +2946,10 @@ static ssize_t mdss_mdp_dyn_pu_show(struct device *dev,
 	int ret, state;
 
 	state = (mdp5_data->dyn_pu_state >= 0) ? mdp5_data->dyn_pu_state : -1;
-
+#ifdef CONFIG_LGE_PARTIAL_UPDATE
+	if (mdss_mdp_get_disable_partail_update())
+		state = 0;
+#endif
 	ret = scnprintf(buf, PAGE_SIZE, "%d", state);
 
 	return ret;
@@ -3457,6 +3675,36 @@ static int mdss_mdp_pp_is_disable_op(struct msmfb_mdp_pp *pp)
 	return ret;
 }
 
+#ifdef CONFIG_LGE_PARTIAL_UPDATE
+static int mdss_mdp_pp_is_enable_color_convert(struct msmfb_mdp_pp *pp)
+{
+	int flags = 0, ret = 0;
+	u32 hue_adj;
+	u32 sat_adj;
+	u32 val_adj;
+	u32 cont_adj;
+
+	switch (pp->op) {
+	case mdp_op_pa_v2_cfg:
+		flags = pp->data.pa_v2_cfg_data.pa_v2_data.flags;
+		hue_adj = pp->data.pa_v2_cfg_data.pa_v2_data.global_hue_adj;
+		sat_adj = pp->data.pa_v2_cfg_data.pa_v2_data.global_sat_adj;
+		val_adj = pp->data.pa_v2_cfg_data.pa_v2_data.global_val_adj;
+		cont_adj = pp->data.pa_v2_cfg_data.pa_v2_data.global_cont_adj;
+		if(flags & (MDP_PP_OPS_WRITE | MDP_PP_OPS_ENABLE)) {
+			if(hue_adj | sat_adj | val_adj | cont_adj) {
+				ret = 1;
+			}
+		}
+		break;
+	default:
+		ret = 0;
+		break;
+	}
+	return ret;
+}
+#endif
+
 static int mdss_mdp_pp_ioctl(struct msm_fb_data_type *mfd,
 				void __user *argp)
 {
@@ -3484,6 +3732,9 @@ static int mdss_mdp_pp_ioctl(struct msm_fb_data_type *mfd,
 	}
 
 	if (mfd->panel_info->partial_update_enabled && mdp5_data->dyn_pu_state
+#ifdef CONFIG_LGE_PARTIAL_UPDATE
+		&& !mdss_mdp_pp_is_enable_color_convert(&mdp_pp)
+#endif
 			&& !mdss_mdp_pp_is_disable_op(&mdp_pp)) {
 		pr_debug("Partial update feature is enabled.\n");
 		return -EPERM;
@@ -3505,6 +3756,12 @@ static int mdss_mdp_pp_ioctl(struct msm_fb_data_type *mfd,
 	case mdp_op_pa_v2_cfg:
 		ret = mdss_mdp_pa_v2_config(&mdp_pp.data.pa_v2_cfg_data,
 					&copyback);
+#ifdef CONFIG_LGE_PARTIAL_UPDATE
+		if (mdss_mdp_pp_is_enable_color_convert(&mdp_pp))
+			mdss_mdp_set_disable_partail_update(0x1);
+		else
+			mdss_mdp_clear_disable_partail_update(0x1);
+#endif
 		break;
 
 	case mdp_op_pcc_cfg:

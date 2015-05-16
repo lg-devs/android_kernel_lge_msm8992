@@ -29,6 +29,8 @@
 #include "mdss_debug.h"
 
 static void mdss_mdp_xlog_mixer_reg(struct mdss_mdp_ctl *ctl);
+static inline u32 get_panel_width(struct mdss_mdp_ctl *ctl);
+static inline int mdss_panel_get_htotal_ctl(struct mdss_mdp_ctl *ctl, bool consider_fbc);
 static inline u64 fudge_factor(u64 val, u32 numer, u32 denom)
 {
 	u64 result = (val * (u64)numer);
@@ -553,7 +555,7 @@ int mdss_mdp_perf_calc_pipe(struct mdss_mdp_pipe *pipe,
 		}
 		xres = get_panel_width(mixer->ctl);
 		is_fbc = pinfo->fbc.enabled;
-		h_total = mdss_panel_get_htotal(pinfo, false);
+		h_total = mdss_panel_get_htotal_ctl(mixer->ctl, false);
 
 		if (is_pingpong_split(mixer->ctl->mfd))
 			h_total += mdss_panel_get_htotal(
@@ -1953,6 +1955,25 @@ static int mdss_mdp_ctl_fbc_enable(int enable,
 	return 0;
 }
 
+static inline int mdss_panel_get_htotal_ctl(struct mdss_mdp_ctl *ctl, bool
+	consider_fbc)
+{
+	int adj_xres;
+	struct mdss_panel_info *pinfo = &ctl->panel_data->panel_info;
+
+	adj_xres = get_panel_xres(&ctl->panel_data->panel_info);
+	if (ctl->panel_data->next && is_pingpong_split(ctl->mfd))
+		adj_xres += get_panel_xres(&ctl->panel_data->next->panel_info);
+
+	if (consider_fbc && pinfo->fbc.enabled)
+		adj_xres = mult_frac(adj_xres,
+	pinfo->fbc.target_bpp, pinfo->bpp);
+
+	return adj_xres + pinfo->lcdc.h_back_porch +
+		pinfo->lcdc.h_front_porch +
+		pinfo->lcdc.h_pulse_width;
+}
+
 void mdss_mdp_get_interface_type(struct mdss_mdp_ctl *ctl, int *intf_type,
 		int *split_needed)
 {
@@ -2043,6 +2064,7 @@ int mdss_mdp_ctl_setup(struct mdss_mdp_ctl *ctl)
 	ctl->mixer_left->width = width;
 	ctl->mixer_left->height = height;
 	ctl->mixer_left->roi = (struct mdss_rect) {0, 0, width, height};
+	ctl->valid_roi = true;
 
 	if (ctl->mfd->split_mode == MDP_DUAL_LM_DUAL_DISPLAY) {
 		pr_debug("dual display detected\n");
@@ -2359,6 +2381,7 @@ int mdss_mdp_ctl_split_display_setup(struct mdss_mdp_ctl *ctl,
 	mixer->height = sctl->height;
 	mixer->roi = (struct mdss_rect)
 				{0, 0, mixer->width, mixer->height};
+	sctl->valid_roi = true;
 	sctl->mixer_left = mixer;
 
 	return mdss_mdp_set_split_ctl(ctl, sctl);
@@ -2729,6 +2752,8 @@ int mdss_mdp_ctl_stop(struct mdss_mdp_ctl *ctl, int power_state)
 		off = __mdss_mdp_ctl_get_mixer_off(ctl->mixer_right);
 		mdss_mdp_ctl_write(ctl, off, 0);
 	}
+
+	ctl->power_state = power_state;
 
 	ctl->play_cnt = 0;
 	mdss_mdp_ctl_perf_update(ctl, 0);

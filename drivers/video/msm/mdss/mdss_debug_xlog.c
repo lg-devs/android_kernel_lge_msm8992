@@ -27,7 +27,12 @@
 #define XLOG_DEFAULT_ENABLE 0
 #endif
 
+#if defined(CONFIG_LGE_MIPI_P1_INCELL_QHD_CMD_PANEL)
+#define XLOG_DEFAULT_PANIC 0
+#define XLOG_DEFAULT_REGDUMP_ENABLE 0
+#else
 #define XLOG_DEFAULT_PANIC 1
+#endif
 #define XLOG_DEFAULT_REGDUMP 0x2 /* dump in RAM */
 
 #define MDSS_XLOG_ENTRY	256
@@ -58,6 +63,10 @@ struct mdss_dbg_xlog {
 	struct mdss_debug_base *blk_arr[MDSS_DEBUG_BASE_MAX];
 	bool work_panic;
 } mdss_dbg_xlog;
+
+#if defined(CONFIG_LGE_MIPI_P1_INCELL_QHD_CMD_PANEL)
+unsigned int reg_dump_enable;
+#endif
 
 static inline bool mdss_xlog_is_enabled(u32 flag)
 {
@@ -315,7 +324,7 @@ static void mdss_dump_reg_by_blk(const char *blk_name)
 		}
 	}
 }
-
+#if 0 /* P1 Display - temporaty blocked */
 static void mdss_dump_reg_all(void)
 {
 	struct mdss_data_type *mdata = mdss_mdp_get_mdata();
@@ -330,7 +339,7 @@ static void mdss_dump_reg_all(void)
 			mdss_dump_reg_by_blk(blk_base->name);
 	}
 }
-
+#endif
 static void clear_dump_blk_arr(struct mdss_debug_base *blk_arr[],
 	u32 blk_len)
 {
@@ -383,6 +392,10 @@ static void xlog_debug_work(struct work_struct *work)
 		mdss_dbg_xlog.work_panic, "xlog_workitem");
 }
 
+#if defined(CONFIG_LGE_MIPI_P1_INCELL_QHD_CMD_PANEL)
+extern int panel_not_connected;
+#endif
+
 void mdss_xlog_tout_handler_default(bool queue, const char *name, ...)
 {
 	int i, index = 0;
@@ -392,6 +405,18 @@ void mdss_xlog_tout_handler_default(bool queue, const char *name, ...)
 	struct mdss_debug_base *blk_base = NULL;
 	struct mdss_debug_base **blk_arr;
 	u32 blk_len;
+
+#if defined(CONFIG_LGE_MIPI_P1_INCELL_QHD_CMD_PANEL)
+	if(!reg_dump_enable)
+		return;
+#endif
+
+#if defined(CONFIG_LGE_MIPI_P1_INCELL_QHD_CMD_PANEL)
+	if(panel_not_connected) {
+		pr_debug("[%s] reg-dump skipped \n", __func__);
+		return;
+	}
+#endif
 
 	if (!mdss_xlog_is_enabled(MDSS_XLOG_DEFAULT))
 		return;
@@ -471,13 +496,14 @@ static ssize_t mdss_xlog_dump_read(struct file *file, char __user *buff,
 static ssize_t mdss_xlog_dump_write(struct file *file,
 	const char __user *user_buf, size_t count, loff_t *ppos)
 {
+#if 0 /* P1 Display - temporaty blocked */
 	mdss_dump_reg_all();
 
 	mdss_xlog_dump_all();
 
 	if (mdss_dbg_xlog.panic_on_err)
 		panic("mdss");
-
+#endif
 	return count;
 }
 
@@ -509,10 +535,16 @@ int mdss_create_xlog_debug(struct mdss_debug_data *mdd)
 			    &mdss_dbg_xlog.panic_on_err);
 	debugfs_create_u32("reg_dump", 0644, mdss_dbg_xlog.xlog,
 			    &mdss_dbg_xlog.enable_reg_dump);
+#if defined(CONFIG_LGE_MIPI_P1_INCELL_QHD_CMD_PANEL)
+	debugfs_create_bool("reg_dump_enable", 0644, mdss_dbg_xlog.xlog,
+				&reg_dump_enable);
+
+	reg_dump_enable = XLOG_DEFAULT_REGDUMP_ENABLE;
+#endif
 
 	mdss_dbg_xlog.xlog_enable = XLOG_DEFAULT_ENABLE;
 	mdss_dbg_xlog.panic_on_err = XLOG_DEFAULT_PANIC;
-	mdss_dbg_xlog.enable_reg_dump = XLOG_DEFAULT_REGDUMP;
+	mdss_dbg_xlog.enable_reg_dump = 0x1;
 
 	pr_info("xlog_status: enable:%d, panic:%d, dump:%d\n",
 		mdss_dbg_xlog.xlog_enable, mdss_dbg_xlog.panic_on_err,
