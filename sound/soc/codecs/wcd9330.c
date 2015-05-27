@@ -678,10 +678,8 @@ int tomtom_enable_qfuse_sensing(struct snd_soc_codec *codec)
 	 * before checking the status.
 	 */
 	usleep_range(5000, 5500);
-    if ((snd_soc_read(codec, TOMTOM_A_QFUSE_STATUS) & (0x03)) != 0x03) {
-        WARN(1, "%s: Qfuse sense is not complete\n", __func__);
-        return 1;
-    }
+	if ((snd_soc_read(codec, TOMTOM_A_QFUSE_STATUS) & (0x03)) != 0x03)
+		WARN(1, "%s: Qfuse sense is not complete\n", __func__);
 	return 0;
 }
 EXPORT_SYMBOL(tomtom_enable_qfuse_sensing);

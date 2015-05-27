@@ -49,11 +49,11 @@ static struct platform_device factory_check_matched_platrom_device = {
 	}
 };
 /*
-void __init lge_add_pre_selfd_devices(void)
-{
-	pr_info(" PRE_SELFD_DEBUG : %s\n", __func__);
-	platform_device_register(&pre_selfd_platrom_device);
-}
+                                           
+ 
+                                              
+                                                     
+ 
 */
 static int __init factory_check_matched_init(void)
 {

@@ -451,13 +451,13 @@ struct dsi_status_data {
 	struct msm_fb_data_type *mfd;
 };
 
-//LGE_UPDATE_S (june1014.lee@lge.com. 2015.03.04). SRE
+//                                                    
 #if defined(CONFIG_LGE_P1_SRE_SUPPORTED)
 #define	SRE_CHANGE_OFF	0
 #define	SRE_CHANGE_ON	1
 int mdss_dsi_panel_sre_apply(unsigned int enabled);
 #endif
-//LGE_UPDATE_E (june1014.lee@lge.com. 2015.03.04). SRE
+//                                                    
 
 int dsi_panel_device_register(struct device_node *pan_node,
 				struct mdss_dsi_ctrl_pdata *ctrl_pdata);

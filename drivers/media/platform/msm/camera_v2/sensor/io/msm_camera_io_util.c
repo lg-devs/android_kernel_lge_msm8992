@@ -25,8 +25,8 @@
 #undef CDBG
 #define CDBG(fmt, args...) pr_debug(fmt, ##args)
 
-/* LGE_CHANGE, camera stability task, Changed to inline function for RTB logging */
-#ifndef CONFIG_MSM_RTB//CONFIG_LGE_CAMERA_RTB_DEBUG
+/*                                                                               */
+#ifndef CONFIG_MSM_RTB//                           
 void msm_camera_io_w(u32 data, void __iomem *addr)
 {
 	CDBG("%s: 0x%p %08x\n", __func__,  (addr), (data));

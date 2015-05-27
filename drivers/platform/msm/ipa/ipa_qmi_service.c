@@ -37,8 +37,8 @@
 
 #define QMI_SEND_REQ_TIMEOUT_MS 60000
 
-/* 2015-03-10, LGE, secheol.pyo@lge.com,
- * fixed modem crash which occured due to ipa_qmi_ctx kzalloc failure under oom.
+/*                                      
+                                                                                
  */
 #define LGE_FIXED_MODEM_CRASH_BY_OOM
 

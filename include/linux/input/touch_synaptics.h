@@ -436,7 +436,7 @@ struct synaptics_ts_data {
 	struct ts_ic_function		f12;
 	struct ts_ic_function		f1a;
 	struct ts_ic_function		f34;
-	struct ts_ic_function		f51; /* only lge */
+	struct ts_ic_function		f51; /*          */
 	struct ts_ic_function		f54;
 	struct ts_ic_function		f55;
 

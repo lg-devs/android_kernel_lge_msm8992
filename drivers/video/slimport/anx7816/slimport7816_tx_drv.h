@@ -323,7 +323,6 @@ void sp_tx_initialization(void);
 unchar sp_tx_cur_bw(void);
 void sp_tx_set_bw(unchar bw);
 unchar sp_rx_cur_bw(void);
-void sp_tx_variable_init(void);
 #ifdef CONFIG_SLIMPORT_DYNAMIC_HPD
 void slimport_set_hdmi_hpd(int on);
 #endif

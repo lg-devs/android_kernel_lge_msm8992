@@ -1726,8 +1726,8 @@ int msm_serial_set_uart_console(int enable)
 		return -EINVAL;
 	}
 
-	/* lge_uart_console status should be chagned for status control,
-	 * but real activation can not be permitted */
+	/*                                                              
+                                             */
 	if (enable) {
 		lge_uart_console_set_enabled(UART_CONSOLE_ENABLED);
 

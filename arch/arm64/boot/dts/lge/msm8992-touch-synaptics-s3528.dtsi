@@ -112,7 +112,7 @@
 		press_interval = <29>;
 		diff_fingers_chk = <1>;
 		diff_finger_num = <5>;
-		subtraction_finger_chk = <0>;
+		subtraction_finger_chk = <1>;
 		subtraction_time = <11>;
 		subtraction_finger_cnt = <5>;
 		long_press_chk = <0>;
@@ -199,8 +199,8 @@
 		/* firmware & panel_spec path */
 		fw_image = "synaptics/p1/PLG446-V1.14-PR1860478-DS5.2.13.1014_4005518E.img",
 					"synaptics/p1/PLG468-V1.05-PR1801483-DS5.2.100.0.1005_50055185.img",
-					"synaptics/p1/PLG446-V1.20-PR1884174-DS5.2.18.1.1004_40055194_v7_2.img", /*PLG446_BL7*/
-					"synaptics/p1/PLG468-V1.19-PR1880917-DS5.2.200.1.1002_50055193504C47343638.img"; /*PLG468_BL7*/
+					"synaptics/p1/PLG446-V1.19-PR1880013-DS5.2.18.1.1004_40055193_v7_2.img", /*PLG446_BL7*/
+					"synaptics/p1/PLG468-V1.18-PR1880917-DS5.2.200.1.1002_50055192504C47343638.img"; /*PLG468_BL7*/
 		panel_spec = "synaptics/p1/p1_limit.txt";
 		panel_spec_mfts_flat = "synaptics/p1/p1_limit_mfts_flat.txt";
 		panel_spec_mfts_curved = "synaptics/p1/p1_limit_mfts_curved.txt";

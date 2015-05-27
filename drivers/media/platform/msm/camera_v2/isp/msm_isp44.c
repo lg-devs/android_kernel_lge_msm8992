@@ -1069,7 +1069,7 @@ static void msm_vfe44_update_camif_state(struct vfe_device *vfe_dev,
 		/*val |= 0xF5;*/
 		val |= 0xF7;
 		msm_camera_io_w_mb(val, vfe_dev->vfe_base + 0x28);
-		msm_camera_io_w_mb(0x140000, vfe_dev->vfe_base + 0x318); //LGCHANGE,QCT Patch(Preview half separated with Dual ISP fix case 01934126), 2015-03-12, soyoung77.park@lge.com
+		msm_camera_io_w_mb(0x140000, vfe_dev->vfe_base + 0x318); //                                                                                                              
 
 		bus_en =
 			((vfe_dev->axi_data.
@@ -1083,7 +1083,7 @@ static void msm_vfe44_update_camif_state(struct vfe_device *vfe_dev,
 		msm_camera_io_w(val, vfe_dev->vfe_base + 0x2F8);
 		msm_camera_io_w_mb(0x4, vfe_dev->vfe_base + 0x2F4);
 		msm_camera_io_w_mb(0x1, vfe_dev->vfe_base + 0x2F4);
-		//msm_camera_io_w_mb(0x200, vfe_dev->vfe_base + 0x318); //LGCHANGE,QCT Patch(Preview half separated with Dual ISP fix case 01934126), 2015-03-12, soyoung77.park@lge.com
+		//                                                                                                                                                                      
 		vfe_dev->axi_data.src_info[VFE_PIX_0].active = 1;
 	} else if (update_state == DISABLE_CAMIF) {
 		msm_camera_io_w_mb(0x0, vfe_dev->vfe_base + 0x2F4);
@@ -1394,7 +1394,7 @@ static int msm_vfe44_axi_restart(struct vfe_device *vfe_dev,
 	msm_camera_io_w(0x7FFFFFFF, vfe_dev->vfe_base + 0x30);
 	msm_camera_io_w(0xFEFFFEFF, vfe_dev->vfe_base + 0x34);
 	msm_camera_io_w(0x1, vfe_dev->vfe_base + 0x24);
-	msm_camera_io_w_mb(0x140000, vfe_dev->vfe_base + 0x318);  //LGCHANGE,QCT Patch(Preview half separated with Dual ISP fix case 01934126), 2015-03-12, soyoung77.park@lge.com
+	msm_camera_io_w_mb(0x140000, vfe_dev->vfe_base + 0x318);  //                                                                                                              
 
 	/* Start AXI */
 	msm_camera_io_w(0x0, vfe_dev->vfe_base + 0x2C0);

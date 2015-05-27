@@ -77,7 +77,7 @@ static unsigned int frequencyTable[50] = {
 
 static int currentBroadCast = TMM_13SEG;
 static int currentSelectedChannel = -1;
-static int oneseg_to_fullseg_value = 370;
+static int oneseg_to_fullseg_value = 350;
 static int fullseg_to_oneseg_value = 450;
 
 s32 OnAir = 0;

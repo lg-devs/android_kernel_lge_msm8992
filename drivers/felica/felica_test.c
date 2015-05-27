@@ -71,7 +71,7 @@ static int felica_test_release (struct inode *inode, struct file *fp)
  */
 static ssize_t felica_test_read(struct file *fp, char *buf, size_t count, loff_t *pos)
 {
-  //pr_info("CBAL current rev -> %d \n",lge_get_board_revno());
+  //                                                           
 
   return 1;
 }

@@ -65,7 +65,7 @@ int lgesoundeffect_enable;
 int lgesoundeffect_modetype;
 int lgesoundeffect_outputdevicetype;
 int lgesoundeffect_mediatype;
-/*int lgesoundeffect_geq_band;*/
+/*                            */
 int lgesoundeffect_geq_gain[7];
 int lgesoundeffect_allparam;
 #endif
@@ -1211,22 +1211,22 @@ static int msm_compr_set_params(struct snd_compr_stream *cstream,
 	case SNDRV_PCM_RATE_11025:
 		prtd->sample_rate = 11025;
 		break;
-	// LGE_AUDIO_UPDATE_S
+	//                   
 	case SNDRV_PCM_RATE_12000:
 		prtd->sample_rate = 12000;
 		break;
-	// LGE_AUDIO_UPDATE_E
+	//                   
 	case SNDRV_PCM_RATE_16000:
 		prtd->sample_rate = 16000;
 		break;
 	case SNDRV_PCM_RATE_22050:
 		prtd->sample_rate = 22050;
 		break;
-	// LGE_AUDIO_UPDATE_S
+	//                   
 	case SNDRV_PCM_RATE_24000:
 		prtd->sample_rate = 24000;
 		break;
-	// LGE_AUDIO_UPDATE_E
+	//                   
 	case SNDRV_PCM_RATE_32000:
 		prtd->sample_rate = 32000;
 		break;
@@ -2414,7 +2414,7 @@ static int lge_dsp_sound_effect_geq_put(struct snd_kcontrol *kcontrol,
 static int lge_dsp_sound_effect_geq_get(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_value *ucontrol)
 {
-	//ucontrol->value.integer.value[0] = lgesoundeffect_geq_band;
+	//                                                           
 	ucontrol->value.integer.value[0] = 0;
 	ucontrol->value.integer.value[1] = lgesoundeffect_geq_gain[0];
 	return 0;

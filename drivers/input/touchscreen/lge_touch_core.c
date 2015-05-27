@@ -78,16 +78,16 @@ int boot_mode = NORMAL_BOOT_MODE;
 
 #define SENSING_TEST_PATH "/mnt/sdcard/sensing_test.txt"
 
-/* Debug mask value
- * usage: echo [debug_mask] > /sys/module/lge_touch_core/parameters/debug_mask
+/*                 
+                                                                              
  */
 u32 touch_debug_mask = DEBUG_BASE_INFO | DEBUG_LPWG_COORDINATES;
 module_param_named(debug_mask, touch_debug_mask, int, S_IRUGO|S_IWUSR|S_IWGRP);
 
 #ifdef LGE_TOUCH_TIME_DEBUG
-/* Debug mask value
- * usage: echo [debug_mask] >
- * /sys/module/lge_touch_core/parameters/time_debug_mask
+/*                 
+                             
+                                                        
  */
 u32 touch_time_debug_mask = DEBUG_TIME_PROFILE_NONE;
 module_param_named(time_debug_mask,
@@ -1083,11 +1083,11 @@ static void safety_reset(struct lge_touch_data *ts)
 	switch (ts->pdata->pwr->reset_control) {
 	case SOFT_RESET:
 		TOUCH_I("SOFT_RESET\n");
+		release_all_touch_event(ts);
 		DO_IF(touch_device_func->ic_ctrl(ts->client,
 					IC_CTRL_RESET, 0x01, &ret)
 				!= 0, error);
 		msleep(ts->pdata->role->softreset_delay);
-		release_all_touch_event(ts);
 		break;
 	case PIN_RESET:
 		TOUCH_I("PIN_RESET\n");
@@ -1425,7 +1425,6 @@ int rebase_ic(struct lge_touch_data *ts)
 				IC_CTRL_BASELINE_REBASE, FORCE_CAL, &ret) != 0,
 			error);
 
-	msleep(2);
 	TOUCH_D(DEBUG_BASE_INFO, "rebase done.\n");
 	atomic_set(&ts->state.rebase, REBASE_DONE);
 
@@ -3702,7 +3701,7 @@ static int touch_resume(struct device *dev)
 
 	mutex_lock(&ts->pdata->thread_lock);
 
-	if (ts->pdata->role->use_sleep_mode) {
+	if (ts->pdata->role->use_sleep_mode && ts->pdata->panel_id) {
 		power_control(ts, POWER_OFF);
 		power_control(ts, POWER_ON);
 	} else {
@@ -3788,6 +3787,8 @@ static int lcd_notifier_callback(struct notifier_block *this,
 		mutex_lock(&ts->pdata->thread_lock);
 		touch_device_func->lpwg(ts_data->client,
 				LPWG_INCELL_LPWG_ON, 0, NULL);
+		if (ts->pdata->panel_id == 0)
+			mdelay(40);
 		mutex_unlock(&ts->pdata->thread_lock);
 		break;
 	case LCD_EVENT_TOUCH_LPWG_OFF:
@@ -3801,6 +3802,12 @@ static int lcd_notifier_callback(struct notifier_block *this,
 		mutex_lock(&ts->pdata->thread_lock);
 		touch_device_func->lpwg(ts_data->client,
 				LPWG_INCELL_LPWG_OFF, 0, NULL);
+		if (ts->pdata->panel_id == 0) {
+			mdelay(10);
+			power_control(ts, POWER_OFF);
+			power_control(ts, POWER_ON);
+			mdelay(30);
+		}
 		mutex_unlock(&ts->pdata->thread_lock);
 		break;
 	case LCD_EVENT_TOUCH_SLEEP_STATUS:
@@ -3838,14 +3845,6 @@ static int lcd_notifier_callback(struct notifier_block *this,
 			TOUCH_D(DEBUG_BASE_INFO,
 					"LCD_EVENT_TOUCH_SET_POWER_OFF\n");
 			power_control(ts, POWER_OFF);
-			break;
-		case SET_DEEP_ACTIVE:
-			TOUCH_D(DEBUG_BASE_INFO, "[YS] Deep to Active!\n");
-			ts->pdata->pwr->reset_control = SOFT_RESET;
-			mutex_lock(&ts->pdata->thread_lock);
-			safety_reset(ts);
-			mutex_unlock(&ts->pdata->thread_lock);
-			ts->pdata->pwr->reset_control = prev_reset_control;
 			break;
 		default:
 			break;

@@ -75,13 +75,13 @@ INT32 FsMountVol(struct super_block *sb)
 	if (drv >= MAX_DRIVE) {
 
 		/*
-		 * LGE_CHANGE_S
-		 * Date     : 2015.03.05
-		 * Author   : bohyun.jung@lge.com
-		 * Comment  : Release semaphore (z_sem) in error condition.
-		 *  In case of attaching storage more than MAX_DRIVE(2),
-		 *  mount fails and no more access on exFAT.
-		 */
+                 
+                          
+                                   
+                                                             
+                                                          
+                                              
+   */
 		printk(KERN_ERR "%s: drv : %d, MAX_DRIVE : %d\n",
 				__func__, drv, MAX_DRIVE);
 		sm_V(&z_sem);

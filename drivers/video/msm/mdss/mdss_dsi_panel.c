@@ -48,7 +48,7 @@ extern int mdss_dsi_cmdlist_rx(struct mdss_dsi_ctrl_pdata *ctrl,
 
 DEFINE_LED_TRIGGER(bl_led_trigger);
 
-//LGE_UPDATE_S (june1014.lee@lge.com. 2015.03.04). SRE
+//                                                    
 #if defined(CONFIG_LGE_P1_SRE_SUPPORTED)
 struct mdss_panel_data *pdata_sre = NULL;
 static unsigned int sre_mode = 0;
@@ -69,7 +69,7 @@ static char *sre_lgdsic_dt[] = {
 };
 static struct sre_cmds_desc *sre_cmds_set;
 #endif
-//LGE_UPDATE_E (june1014.lee@lge.com. 2015.03.04). SRE
+//                                                    
 
 void mdss_dsi_panel_pwm_cfg(struct mdss_dsi_ctrl_pdata *ctrl)
 {
@@ -908,12 +908,12 @@ static int mdss_dsi_panel_on(struct mdss_panel_data *pdata)
 	ctrl = container_of(pdata, struct mdss_dsi_ctrl_pdata,
 				panel_data);
 
-//LGE_UPDATE_S (june1014.lee@lge.com. 2015.03.04). SRE
+//                                                    
 #if defined(CONFIG_LGE_P1_SRE_SUPPORTED)
 	if (pdata_sre == NULL)
 		pdata_sre = pdata;
 #endif
-//LGE_UPDATE_E (june1014.lee@lge.com. 2015.03.04). SRE
+//                                                    
 
 	pr_info("%s: ctrl=%p ndx=%d\n", __func__, ctrl, ctrl->ndx);
 
@@ -2152,7 +2152,7 @@ static int mdss_panel_parse_dt(struct device_node *np,
 	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->off_cmds,
 		"qcom,mdss-dsi-off-command", "qcom,mdss-dsi-off-command-state");
 
-//LGE_UPDATE_S (june1014.lee@lge.com. 2015.03.04). SRE
+//                                                    
 #if defined(CONFIG_LGE_P1_SRE_SUPPORTED)
 	sre_cmds_set = kzalloc(sizeof(struct sre_cmds_desc), GFP_KERNEL);
 	switch (pinfo->panel_type) {
@@ -2191,7 +2191,7 @@ static int mdss_panel_parse_dt(struct device_node *np,
 	if (pdata_sre == NULL)
 		pdata_sre = &(ctrl_pdata->panel_data);
 #endif
-//LGE_UPDATE_E (june1014.lee@lge.com. 2015.03.04). SRE
+//                                                    
 
 	pinfo->mipi.force_clk_lane_hs = of_property_read_bool(np,
 		"qcom,mdss-dsi-force-clock-lane-hs");
@@ -2212,7 +2212,7 @@ error:
 	return -EINVAL;
 }
 
-//LGE_UPDATE_S (june1014.lee@lge.com. 2015.03.04). SRE
+//                                                    
 #if defined(CONFIG_LGE_P1_SRE_SUPPORTED)
 int mdss_dsi_panel_sre_apply(unsigned int enabled) {
 	struct mdss_dsi_ctrl_pdata *ctrl = NULL;
@@ -2274,7 +2274,7 @@ static struct device_attribute sre_status_attrs[] = {
 	__ATTR(sre_status, 0644, sre_mode_get, sre_mode_set),
 };
 #endif
-//LGE_UPDATE_E (june1014.lee@lge.com. 2015.03.04). SRE
+//                                                    
 
 int mdss_dsi_panel_init(struct device_node *node,
 	struct mdss_dsi_ctrl_pdata *ctrl_pdata,
@@ -2284,7 +2284,7 @@ int mdss_dsi_panel_init(struct device_node *node,
 	static const char *panel_name;
 	struct mdss_panel_info *pinfo;
 
-//LGE_UPDATE_S (june1014.lee@lge.com. 2015.03.04). SRE
+//                                                    
 #if defined(CONFIG_LGE_P1_SRE_SUPPORTED)
 	static struct class *sre = NULL;
 	static struct device *sre_sysfs_dev = NULL;
@@ -2295,7 +2295,7 @@ int mdss_dsi_panel_init(struct device_node *node,
 			pr_err("%s: Failed to create sre class\n", __func__);
 	}
 #endif
-//LGE_UPDATE_E (june1014.lee@lge.com. 2015.03.04). SRE
+//                                                    
 
 	if (!node || !ctrl_pdata) {
 		pr_err("%s: Invalid arguments\n", __func__);
@@ -2331,7 +2331,7 @@ int mdss_dsi_panel_init(struct device_node *node,
 		}
 #endif
 		lge_set_panel(pinfo->panel_type);
-//LGE_UPDATE_S (june1014.lee@lge.com. 2015.03.04). SRE
+//                                                    
 #if defined(CONFIG_LGE_P1_SRE_SUPPORTED)
 		if ( !sre_sysfs_dev ) {
 			sre_sysfs_dev = device_create(sre, NULL, 0, NULL, "sre_func");
@@ -2345,7 +2345,7 @@ int mdss_dsi_panel_init(struct device_node *node,
 			}
 		}
 #endif
-//LGE_UPDATE_E (june1014.lee@lge.com. 2015.03.04). SRE
+//                                                    
 
 	}
 	rc = mdss_panel_parse_dt(node, ctrl_pdata);

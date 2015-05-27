@@ -47,7 +47,7 @@
 #define CONFIG_LGE_PM_USBIN
 #define CONFIG_LGE_PM_BMD
 #define CONFIG_LGE_PM_OV
-/* #define CONFIG_LGE_PM_AICL Not used */
+/*                                     */
 #define CONFIG_LGE_PM_HVDCP_WAKELOCK
 #define CONFIG_LGE_PM_DIS_AICL_IRQ
 #define CONFIG_LGE_PM_UV_WAKELOCK
@@ -2938,7 +2938,6 @@ static void smbchg_aicl_deglitch_wa_en(struct smbchg_chip *chip, bool en)
 			pr_err("Couldn't write to DC_AICL_CFG rc=%d\n", rc);
 			return;
 		}
-#ifndef CONFIG_LGE_PM
 		rc = smbchg_sec_masked_write(chip,
 			chip->misc_base + MISC_TRIM_OPT_15_8,
 			AICL_RERUN_MASK, AICL_RERUN_ON);
@@ -2948,7 +2947,6 @@ static void smbchg_aicl_deglitch_wa_en(struct smbchg_chip *chip, bool en)
 			return;
 		}
 		pr_smb(PR_STATUS, "AICL deglitch set to short\n");
-#endif
 	} else if (!en && chip->aicl_deglitch_short) {
 		rc = smbchg_sec_masked_write(chip,
 			chip->usb_chgpth_base + USB_AICL_CFG,
@@ -2964,7 +2962,6 @@ static void smbchg_aicl_deglitch_wa_en(struct smbchg_chip *chip, bool en)
 			pr_err("Couldn't write to DC_AICL_CFG rc=%d\n", rc);
 			return;
 		}
-#ifndef CONFIG_LGE_PM
 		rc = smbchg_sec_masked_write(chip,
 			chip->misc_base + MISC_TRIM_OPT_15_8,
 			AICL_RERUN_MASK, AICL_RERUN_OFF);
@@ -2974,7 +2971,6 @@ static void smbchg_aicl_deglitch_wa_en(struct smbchg_chip *chip, bool en)
 			return;
 		}
 		pr_smb(PR_STATUS, "AICL deglitch set to normal\n");
-#endif
 	}
 	chip->aicl_deglitch_short = en;
 }

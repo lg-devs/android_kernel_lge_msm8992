@@ -2969,9 +2969,9 @@ int msm_hs_get_pm_state_active(struct uart_port *uport)
 EXPORT_SYMBOL(msm_hs_get_pm_state_active);
 //BT_E : [CONBT-966] Fix to HCI command timeout
 
-#endif /* CONFIG_LGE_BLUESLEEP */
-/* LG_BTUI : chanha.park@lge.com : Added bluesleep interface - [E] */
-/* LGE_CHANGE_E, [BT][younghyun.kwon@lge.com], 2013-04-10 */
+#endif /*                      */
+/*                                                                 */
+/*                                                        */
 
 
 /**

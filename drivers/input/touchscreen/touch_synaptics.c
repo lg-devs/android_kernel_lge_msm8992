@@ -672,7 +672,7 @@ static int tci_control(struct synaptics_ts_data *ts, int type, u8 value)
 					ts->f51_reg.lpwg_partial_reg,
 					1, buffer), error);
 
-			TOUCH_I("%s: partial lpwg, prev:0x%02X, next:0x%02X (value:%d)\n",
+			TOUCH_I("%s: partial lpwg, prev:0x%02X, next:0x%02X (value:%d)",
 					__func__,
 					buffer[0],
 					value ? (buffer[0] & 0xfc) | value :
@@ -1043,6 +1043,7 @@ static int sleep_control(struct synaptics_ts_data *ts, int mode, int recal)
 		if (synaptics_ts_ic_ctrl(ts->client, IC_CTRL_RESET,
 					DEVICE_COMMAND_RESET, &ret) < 0)
 			TOUCH_E("IC_RESET handling fail\n");
+		msleep(30);
 
 		return 0;
 	}
@@ -5225,14 +5226,40 @@ static int lpwg_update_all(struct synaptics_ts_data *ts, bool irqctrl)
 
 	if (is_product(ts, "PLG349", 6)) {
 		DO_SAFE(sleep_control(ts, sleep_status, 0), error);
-	} else {
+	} else if (is_product(ts, "PLG446", 6) &&
+			ts->lpwg_ctrl.protocol9_sleep_flag) {
+		if (ts->lpwg_ctrl.lpwg_is_enabled) {
+			touch_swipe_status(ts->client,
+					ts->pdata->swipe_stat[1]);
+			TOUCH_D(DEBUG_BASE_INFO, "sending Swipe status to DDIC\n");
+		}
+		if (!ts->lpwg_ctrl.prev_screen && ts->lpwg_ctrl.screen) {
+			/* Deep_sleep -> Active */
+			if (!ts->lpwg_ctrl.lpwg_mode) {
+				TOUCH_D(DEBUG_BASE_INFO,
+					"%s : deep sleep -> Active, no reset\n",
+					__func__);
+			}
+		} else if (!ts->lpwg_ctrl.prev_screen
+				&& !ts->lpwg_ctrl.screen) {
+			if (!ts->lpwg_ctrl.lpwg_mode) {
+				TOUCH_D(DEBUG_BASE_INFO,
+				"[%s] LPWG Disable !\n", __func__);
+				sleep_status = 0;
+			}
+			DO_SAFE(sleep_control(ts, sleep_status, 0),
+						error);
+			TOUCH_D(DEBUG_BASE_INFO,
+				"Normal case of sleep !\n");
+		}
+	} else if (is_product(ts, "PLG468", 6)) {
 		TOUCH_D(DEBUG_BASE_INFO,
-				"Sensor Status: %d\n", ts->lpwg_ctrl.sensor);
+			"LGD Sensor Status: %d\n", ts->lpwg_ctrl.sensor);
 		TOUCH_D(DEBUG_BASE_INFO,
-				"lpwg_is_enabled: %d\n", ts->lpwg_ctrl.lpwg_is_enabled);
+			"lpwg_is_enabled: %d\n", ts->lpwg_ctrl.lpwg_is_enabled);
 		ts->pdata->swipe_stat[0] = ts->lpwg_ctrl.sensor;
 		if (!ts->lpwg_ctrl.lpwg_mode &&
-				!ts->pdata->swipe_stat[1]) {
+			!ts->pdata->swipe_stat[1]) {
 			touch_sleep_status(ts->client, 1);
 			TOUCH_D(DEBUG_BASE_INFO,
 			"[%s] LPWG Disable !\n", __func__);
@@ -5242,7 +5269,7 @@ static int lpwg_update_all(struct synaptics_ts_data *ts, bool irqctrl)
 			touch_sleep_status(ts->client, !ts->lpwg_ctrl.sensor);
 		} else if (ts->lpwg_ctrl.lpwg_is_enabled) {
 			touch_swipe_status(ts->client,
-					ts->pdata->swipe_stat[1]);
+				       ts->pdata->swipe_stat[1]);
 		}
 	}
 
@@ -5356,20 +5383,30 @@ enum error_type synaptics_ts_init(struct i2c_client *client)
 					DEVICE_CONTROL_NORMAL_OP
 					| DEVICE_CONTROL_CONFIGURED), error);
 
-		DO_SAFE(synaptics_ts_page_data_read(client, LPWG_PAGE,
+		if (incoming_call_state) {
+			DO_SAFE(synaptics_ts_page_data_read(client, LPWG_PAGE,
+						LPWG_PARTIAL_REG + 71,
+						1, buf_array), error);
+			buf_array[0] = (buf_array[0] & 0xff) & 0xfb;
+			DO_SAFE(synaptics_ts_page_data_write(client, LPWG_PAGE,
+						LPWG_PARTIAL_REG + 71,
+						1, buf_array), error);
+			DO_SAFE(synaptics_ts_page_data_read(client, LPWG_PAGE,
 					LPWG_PARTIAL_REG + 71,
-					1, &buf), error);
-		buf_array[0] = touch_ta_status ? 0x02 : 0x00;
-		buf_array[1] = incoming_call_state ? 0x00 : 0x04;
-		TOUCH_I("%s: prev:0x%02X, next:0x%02X (TA: %d / Call: %d)",
-				__func__,
-				buf,
-				(buf & 0xF9) | (buf_array[0] | buf_array[1]),
-				touch_ta_status, incoming_call_state);
-		buf = (buf & 0xF9) | (buf_array[0] | buf_array[1]);
-		DO_SAFE(synaptics_ts_page_data_write(client, LPWG_PAGE,
-					LPWG_PARTIAL_REG + 71,
-					1, &buf), error);
+					1, buf_array), error);
+			TOUCH_I("%s : incoming_call(%d) = 0x%02x\n",
+				__func__, incoming_call_state, buf_array[0]);
+		}
+
+		if (touch_ta_status) {
+			DO_SAFE(synaptics_ts_page_data_read(client, LPWG_PAGE,
+						LPWG_PARTIAL_REG + 71,
+						1, buf_array), error);
+			buf_array[0] = (buf_array[0] & 0xff) | 0x02;
+			DO_SAFE(synaptics_ts_page_data_write(client, LPWG_PAGE,
+						LPWG_PARTIAL_REG + 71,
+						1, buf_array), error);
+		}
 	} else if (is_product(ts, "PLG446", 6)) {
 		if (touch_ta_status == 2 || touch_ta_status == 3) {
 			TOUCH_I("[%s] DEVICE_CONTROL_NOSLEEP\n", __func__);
@@ -6412,8 +6449,8 @@ enum error_type synaptics_ts_fw_upgrade(struct i2c_client *client,
 			goto firmware_up_error;
 		}
 
-		/* it will be reset and initialized
-		 * automatically by lge_touch_core. */
+		/*                                 
+                                      */
 	}
 	release_firmware(fw_entry);
 	return NO_UPGRADE;
@@ -6684,6 +6721,16 @@ enum error_type synaptics_ts_lpwg(struct i2c_client *client,
 			lpwg_by_lcd_notifier = true;
 			set_rebase_param(ts, 0);
 			tci_control(ts, REPORT_MODE_CTRL, 1);
+
+			if ((!ts->lpwg_ctrl.sensor &&
+				 !ts->lpwg_ctrl.qcover) ||
+				 (!ts->lpwg_ctrl.lpwg_mode)) {
+				sleep_control(ts, 0, 0);
+				TOUCH_D(DEBUG_BASE_INFO, "LPWG Disable\n");
+				TOUCH_D(DEBUG_BASE_INFO,
+						"%s : Active->deep sleep\n",
+						__func__);
+			}
 		} else if (is_product(ts, "PLG468", 6)) {
 			TOUCH_I("[%s] CONTROL_REG : DEVICE_CONTROL_NOSLEEP\n",
 					__func__);
@@ -6691,7 +6738,7 @@ enum error_type synaptics_ts_lpwg(struct i2c_client *client,
 				DEVICE_CONTROL_REG,
 				DEVICE_CONTROL_NOSLEEP
 				| DEVICE_CONTROL_CONFIGURED),
-					error);
+			error);
 
 			tci_control(ts, REPORT_MODE_CTRL, 1);
 			lpwg_by_lcd_notifier = true;
@@ -6726,8 +6773,6 @@ enum error_type synaptics_ts_lpwg(struct i2c_client *client,
 			DEVICE_CONTROL_NOSLEEP
 			| DEVICE_CONTROL_CONFIGURED),
 		error);
-		if (is_product(ts, "PLG446", 6))
-			mdelay(30);
 		break;
 	default:
 		break;
@@ -6910,22 +6955,23 @@ static void synaptics_change_sleepmode(struct i2c_client *client)
 	u8 curr[2] = {0};
 
 	if (is_product(ts, "PLG468", 6)) {
-		DO_SAFE(synaptics_ts_page_data_read(client, LPWG_PAGE,
-				LPWG_PARTIAL_REG + 71,
-				1, curr), error);
-		TOUCH_I("%s: prev:0x%02X, next:0x%02X (TA :%d)\n",
-				__func__,
-				curr[0],
-				touch_ta_status ? (curr[0] & 0xff) | 0x02 :
-							(curr[0] & 0xff) & 0xfd,
-				touch_ta_status);
-		if (touch_ta_status)
+		if (touch_ta_status) {
+			DO_SAFE(synaptics_ts_page_data_read(client, LPWG_PAGE,
+					LPWG_PARTIAL_REG + 71,
+					1, curr), error);
 			curr[0] = (curr[0] & 0xff) | 0x02;
-		else
+			DO_SAFE(synaptics_ts_page_data_write(client, LPWG_PAGE,
+					LPWG_PARTIAL_REG + 71,
+					1, curr), error);
+		} else {
+			DO_SAFE(synaptics_ts_page_data_read(client, LPWG_PAGE,
+					LPWG_PARTIAL_REG + 71,
+					1, curr), error);
 			curr[0] = (curr[0] & 0xff) & 0xfd;
-		DO_SAFE(synaptics_ts_page_data_write(client, LPWG_PAGE,
-				LPWG_PARTIAL_REG + 71,
-				1, curr), error);
+			DO_SAFE(synaptics_ts_page_data_write(client, LPWG_PAGE,
+					LPWG_PARTIAL_REG + 71,
+					1, curr), error);
+		}
 	} else if (is_product(ts, "PLG446", 6)) {
 		if (touch_ta_status == 2 || touch_ta_status == 3) {
 			curr[0] = 0x01;

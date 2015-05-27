@@ -332,7 +332,7 @@ void lge_uart_console_set_ready(unsigned int ready)
 	s_uart_console_status |= (ready ? UART_CONSOLE_READY : 0);
 }
 
-#endif /* CONFIG_LGE_EARJACK_DEBUGGER */
+#endif /*                             */
 
 #if defined(CONFIG_LGE_MIPI_P1_INCELL_QHD_CMD_PANEL)
 static int __init display_dsv_setup(char *dsv_cmd)
@@ -499,11 +499,11 @@ int __init lge_boot_mode_init(char *s)
 		lge_boot_mode = LGE_BOOT_MODE_PIF_130K;
 	else if (!strcmp(s, "pif_910k"))
 		lge_boot_mode = LGE_BOOT_MODE_PIF_910K;
-	/* LGE_UPDATE_S for MINIOS2.0 */
+	/*                            */
 	else if (!strcmp(s, "miniOS"))
 		lge_boot_mode = LGE_BOOT_MODE_MINIOS;
 	pr_info("ANDROID BOOT MODE : %d %s\n", lge_boot_mode, s);
-	/* LGE_UPDATE_E for MINIOS2.0 */
+	/*                            */
 
 	return 1;
 }

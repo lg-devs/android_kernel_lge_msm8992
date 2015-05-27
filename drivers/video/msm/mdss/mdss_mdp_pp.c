@@ -102,12 +102,12 @@ struct mdp_csc_cfg dmb_csc_convert = {
 	{ 0x0, 0x0, 0x0,},
 	{ 0x0, 0xff, 0x0, 0xff, 0x0, 0xff,},
 	{ 0x0, 0xff, 0x0, 0xff, 0x0, 0xff,},
-#elif defined(CONFIG_MACH_MSM8992_P1_KDDI_JP)
+#elif defined(CONFIG_MACH_MSM8992_P1_KDDI)
 	0,
 	{
-		0x0252, 0x0000, 0x0331,
-		0x0234, 0xff37, 0xfe60,
-		0x0272, 0x0409, 0x0000,
+		0x0254, 0x0000, 0x0331,
+		0x0254, 0xff37, 0xfe60,
+		0x0254, 0x0409, 0x0000,
 	},
 	{ 0xfff0, 0xff80, 0xff80,},
 	{ 0x0, 0x0, 0x0,},
@@ -126,7 +126,7 @@ struct mdp_csc_cfg dmb_csc_convert = {
 	{ 0x0, 0xff, 0x0, 0xff, 0x0, 0xff,},
 #endif
 };
-#endif /* LGE_BROADCAST */
+#endif /*               */
 
 /*
  * To program a linear LUT we need to make the slope to be 1/16 to enable
@@ -411,7 +411,7 @@ int pp_set_dmb_status(int flag) {
 	dmb_status = flag;
 	return 0;
 }
-#endif /* LGE_BROADCAST */
+#endif /*               */
 
 #if defined(CONFIG_LGE_CAM_PREVIEW_TUNE)
 static int cam_preview_tune_status; // on - 1, off - 0
@@ -419,7 +419,7 @@ int pp_set_cam_preview_tune_status(int flag) {
 	cam_preview_tune_status = flag;
 	return 0;
 }
-#endif /* LGE_CAM_PREVIEW_TUNE */
+#endif /*                      */
 
 static u32 pp_hist_read(char __iomem *v_addr,
 				struct pp_hist_col_info *hist_info);
@@ -982,7 +982,7 @@ static int pp_vig_pipe_setup(struct mdss_mdp_pipe *pipe, u32 *op)
 				mdss_mdp_csc_setup(MDSS_MDP_BLOCK_SSPP, pipe->num, MDSS_MDP_CSC_YUV2RGB);
 			}
 #endif
-#endif /* LGE_BROADCAST */
+#endif /*               */
 		}
 	}
 

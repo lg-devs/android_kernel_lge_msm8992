@@ -101,7 +101,7 @@ static u32 mdss_fb_pseudo_palette[16] = {
 #if defined(CONFIG_LGE_BROADCAST_TDMB) || defined(CONFIG_LGE_BROADCAST_ISDBT_JAPAN)
 extern struct mdp_csc_cfg dmb_csc_convert;
 extern int pp_set_dmb_status(int flag);
-#endif /* LGE_BROADCAST */
+#endif /*               */
 
 static struct msm_mdp_interface *mdp_instance;
 
@@ -3850,7 +3850,7 @@ int mdss_fb_do_ioctl(struct fb_info *info, unsigned int cmd,
 #if defined(CONFIG_LGE_BROADCAST_TDMB) || defined(CONFIG_LGE_BROADCAST_ISDBT_JAPAN)
 	int dmb_flag = 0;
 	struct mdp_csc_cfg dmb_csc_cfg;
-#endif /* LGE_BROADCAST */
+#endif /*               */
 
 	if (!info || !info->par)
 		return -EINVAL;
@@ -3936,7 +3936,7 @@ int mdss_fb_do_ioctl(struct fb_info *info, unsigned int cmd,
 			return ret;
 		memcpy(dmb_csc_convert.csc_mv, dmb_csc_cfg.csc_mv, sizeof(dmb_csc_cfg.csc_mv));
 		break;
-#endif /* LGE_BROADCAST */
+#endif /*               */
 
 	case MSMFB_LPM_ENABLE:
 		ret = copy_from_user(&dsi_mode, argp, sizeof(dsi_mode));

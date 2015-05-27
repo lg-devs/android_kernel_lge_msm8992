@@ -256,7 +256,7 @@ static int temp_comp[NUMBER_DELTA_TEMP][2] = {
 };
 #endif
 
-#ifdef CONFIG_LGE_PM_DEBUG
+#ifdef CONFIG_LGE_PM
 static int fg_debug_mask = FG_STATUS;
 #else
 static int fg_debug_mask;
@@ -3025,12 +3025,7 @@ wait:
 			schedule_work(&chip->dump_sram);
 		goto done;
 	}
-#ifdef CONFIG_LGE_PM
-	if (fg_est_dump)
-		dump_sram(&chip->dump_sram);
-#else
 	dump_sram(&chip->dump_sram);
-#endif
 	if ((fg_debug_mask & FG_STATUS) && !vbat_in_range)
 		pr_info("Vbat out of range: v_current_pred: %d, v:%d\n",
 				fg_data[FG_DATA_CPRED_VOLTAGE].value,
@@ -4600,13 +4595,9 @@ static int fg_suspend(struct device *dev)
 	if (!chip->sw_rbias_ctrl)
 		return 0;
 
-#ifdef CONFIG_LGE_PM
-	cancel_delayed_work_sync(&chip->update_temp_work);
-	cancel_delayed_work_sync(&chip->update_sram_data);
-#else
 	cancel_delayed_work(&chip->update_temp_work);
 	cancel_delayed_work(&chip->update_sram_data);
-#endif
+
 	return 0;
 }
 

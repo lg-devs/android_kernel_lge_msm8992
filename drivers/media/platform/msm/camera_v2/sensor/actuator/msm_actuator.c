@@ -35,9 +35,9 @@ static struct msm_actuator msm_vcm_actuator_table;
 static struct msm_actuator msm_piezo_actuator_table;
 static struct msm_actuator msm_hvcm_actuator_table;
 static struct msm_actuator msm_bivcm_actuator_table;
-/* LGE_CHANGE_S*/
+/*             */
 static struct msm_actuator msm_close_loop_actuator_table;
-/* LGE_CHANGE_E*/
+/*             */
 
 static struct i2c_driver msm_actuator_i2c_driver;
 static struct msm_actuator *actuators[] = {
@@ -45,9 +45,9 @@ static struct msm_actuator *actuators[] = {
 	&msm_piezo_actuator_table,
 	&msm_hvcm_actuator_table,
 	&msm_bivcm_actuator_table,
-	/* LGE_CHANGE_S*/
+	/*             */
 	&msm_close_loop_actuator_table,
-	/* LGE_CHANGE_E*/
+	/*             */
 };
 
 static int32_t msm_actuator_piezo_set_default_focus(
@@ -638,7 +638,7 @@ static int32_t msm_actuator_move_focus(
 	return rc;
 }
 
-/* LGE_CHANGE_S*/
+/*             */
 extern void lc898122a_af_vcm_code(int16_t UsVcmCod);
 
 static void msm_actuator_parse_claf_i2c_params(struct msm_actuator_ctrl_t *a_ctrl,
@@ -772,7 +772,7 @@ static int32_t msm_actuator_claf_move_focus(
 
 	return rc;
 }
-/* LGE_CHANGE_E*/
+/*             */
 
 static int32_t msm_actuator_bivcm_move_focus(
 	struct msm_actuator_ctrl_t *a_ctrl,
@@ -1314,7 +1314,7 @@ static int32_t msm_actuator_set_param(struct msm_actuator_ctrl_t *a_ctrl,
 		return -EFAULT;
 	}
 #else
-/* LGE_CHANGE_S*/
+/*             */
 	if (set_info->actuator_params.act_type != ACTUATOR_CLOSE_LOOP_HVCM) {
 		if (set_info->af_tuning_params.total_steps
 			>  MAX_ACTUATOR_AF_TOTAL_STEPS) {
@@ -1323,7 +1323,7 @@ static int32_t msm_actuator_set_param(struct msm_actuator_ctrl_t *a_ctrl,
 			return -EFAULT;
 		}
 	}
-/* LGE_CHANGE_E*/
+/*             */
 #endif
 	if (set_info->af_tuning_params.region_size
 		> MAX_ACTUATOR_REGION) {
@@ -2094,7 +2094,7 @@ static struct msm_actuator msm_bivcm_actuator_table = {
 	},
 };
 
-/* LGE_CHANGE_S*/
+/*             */
 static struct msm_actuator msm_close_loop_actuator_table = {
 	.act_type = ACTUATOR_CLOSE_LOOP_HVCM,
 	.func_tbl = {
@@ -2108,7 +2108,7 @@ static struct msm_actuator msm_close_loop_actuator_table = {
 		.actuator_park_lens = msm_actuator_park_lens,
 	},
 };
-/* LGE_CHANGE_E*/
+/*             */
 module_init(msm_actuator_init_module);
 MODULE_DESCRIPTION("MSM ACTUATOR");
 MODULE_LICENSE("GPL v2");

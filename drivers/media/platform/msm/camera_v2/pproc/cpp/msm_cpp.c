@@ -313,7 +313,7 @@ static void cpp_timer_callback(unsigned long data);
 
 uint8_t induce_error;
 static int msm_cpp_enable_debugfs(struct cpp_device *cpp_dev);
-/* LGE_CHANGE, camera stability task, Changed to inline function for RTB logging */
+/*                                                                               */
 static inline void msm_cpp_write(u32 data, void __iomem *cpp_base)
 {
 	writel_relaxed((data), cpp_base + MSM_CPP_MICRO_FIFO_RX_DATA);
@@ -1541,10 +1541,10 @@ NOTIFY_FRAME_DONE:
 		v4l2_evt.id = processed_frame->inst_id;
 		v4l2_evt.type = V4L2_EVENT_CPP_FRAME_DONE;
 		v4l2_event_queue(cpp_dev->msm_sd.sd.devnode, &v4l2_evt);
-		/*QCT_PATCH S, fix the kernel panic in dual camera mode, 2015-03-07, freeso.kim@lge.com*/
+		/*                                                                                     */
 		#if 0
 		#endif
-		/*QCT_PATCH E, fix the kernel panic in dual camera mode, 2015-03-07, freeso.kim@lge.com*/
+		/*                                                                                     */
 	}
 	return rc;
 }
@@ -1669,7 +1669,7 @@ static int msm_cpp_send_frame_to_hardware(struct cpp_device *cpp_dev,
 		if (queue_len == 1) {
 			atomic_set(&cpp_timer.used, 1);
 			/* install timer for cpp timeout */
-#if 0 	/* LGE_CHANGE, CST, moved setup_timer to initial func */
+#if 0 	/*                                                    */
 			CPP_DBG("Installing cpp_timer\n");
 			setup_timer(&cpp_timer.cpp_timer,
 				cpp_timer_callback, (unsigned long)&cpp_timer);
@@ -3375,7 +3375,7 @@ static int cpp_probe(struct platform_device *pdev)
 	cpp_dev->iommu_state = CPP_IOMMU_STATE_DETACHED;
 	cpp_timer.data.cpp_dev = cpp_dev;
 	atomic_set(&cpp_timer.used, 0);
-	/* LGE_CHANGE, CST, moved setup_timer to initial func */
+	/*                                                    */
 	CPP_DBG("Installing cpp_timer\n");
 	setup_timer(&cpp_timer.cpp_timer,
 		cpp_timer_callback, (unsigned long)&cpp_timer);

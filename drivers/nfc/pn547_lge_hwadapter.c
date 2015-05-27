@@ -7,7 +7,7 @@ int pn547_get_hw_revision(void)
     hw_revision = system_rev;
 #else
 //    hw_rev_type hw_revision = HW_REV_MAX;
-//    hw_revision = lge_get_board_revno();
+//                                        
 #endif
 //    dprintk(PN547_DRV_NAME ":ioctl: pn547_read hw revision : %d\n", hw_revision);
 //    return (int)hw_revision;

@@ -3246,13 +3246,12 @@ int RspNoiseP2PTest(void)
 
 int RspGroupTest(void)
 {
-	int raw_result = 0;
-	int noise_result = 0;
+	int result = 0;
 	TOUCH_I("%s\n", __func__);
-	raw_result = RspRawDataTest();
-	noise_result = RspNoiseP2PTest();	/*not considered test item*/
+	result += RspRawDataTest();
+	result += RspNoiseP2PTest();
 
-	if (raw_result)
+	if (result == 2)
 		return 1;
 	else
 		return 0;

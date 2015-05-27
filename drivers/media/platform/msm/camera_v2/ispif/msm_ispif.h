@@ -68,6 +68,6 @@ struct ispif_device {
 /*LGCHANGE,QCT Patch camif error 15.04.02*/
 	uint32_t num_clk;
 	uint32_t clk_idx;
-	struct regulator *fs_vfe;	//LGE_CHANGE, vdd_vfe to check if vfe is up
+	struct regulator *fs_vfe;	//                                         
 };
 #endif

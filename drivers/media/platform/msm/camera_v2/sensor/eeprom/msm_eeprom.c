@@ -22,10 +22,10 @@
 
 #undef CDBG
 #define CDBG(fmt, args...) pr_debug(fmt, ##args)
-/* LGE_CHANGE_S, camera id, 2015-04-07, byungsoo.moon@lge.com */
+/*                                                            */
 static struct class *camera_vendor_id_class = NULL;
 static int8_t main_sensor_id = -1;
-/* LGE_CHANGE_E, camera id, 2015-04-07, byungsoo.moon@lge.com */
+/*                                                            */
 
 DEFINE_MSM_MUTEX(msm_eeprom_mutex);
 #ifdef CONFIG_COMPAT
@@ -448,9 +448,9 @@ static struct msm_cam_clk_info cam_8960_clk_info[] = {
 };
 
 static struct msm_cam_clk_info cam_8974_clk_info[] = {
-	/* LGE_CHANGE_S, camera bringup*/
+	/*                             */
 	[SENSOR_CAM_MCLK] = {"cam_src_clk", 24000000},
-	/* LGE_CHANGE_E, camera bringup*/
+	/*                             */
 	[SENSOR_CAM_CLK] = {"cam_clk", 0},
 };
 
@@ -547,7 +547,7 @@ static int msm_eeprom_get_dt_data(struct msm_eeprom_ctrl_t *e_ctrl)
 		power_info->cam_vreg, power_info->num_vreg,
 		power_info);
 	if (rc < 0)
-		goto ERROR2;	/*LGE_CHANGE, make sure free up the allocated object*/
+		goto ERROR2;	/*                                                  */
 
 	power_info->gpio_conf = kzalloc(sizeof(struct msm_camera_gpio_conf),
 					GFP_KERNEL);
@@ -595,13 +595,13 @@ ERROR3:
 	kfree(power_info->gpio_conf);
 ERROR2:
 	kfree(power_info->cam_vreg);
-//ERROR1:	//LGE_CHANGE, make sure free up the allocated object*/
-/* LGE_CHANGE_S, camera bringup*/
+//                                                              
+/*                             */
 	if (power_info->power_setting)
 		kfree(power_info->power_setting);
 	if (power_info->power_down_setting)
 		kfree(power_info->power_down_setting);
-/* LGE_CHANGE_E, camera bringup*/
+/*                             */
 	return rc;
 }
 
@@ -860,7 +860,7 @@ static int eeprom_config_read_cal_data32(struct msm_eeprom_ctrl_t *e_ctrl,
 
 	rc = copy_to_user(ptr_dest, e_ctrl->cal_data.mapdata,
 		cdata.cfg.read_data.num_bytes);
-/*LGE_CHANGE_S, fixed eeprom crash, 2014-10-20, ejoon.kim@lge.com */
+/*                                                                */
 #if 0
 	/* should only be called once.  free kernel resource */
 	if (!rc) {
@@ -869,7 +869,7 @@ static int eeprom_config_read_cal_data32(struct msm_eeprom_ctrl_t *e_ctrl,
 		memset(&e_ctrl->cal_data, 0, sizeof(e_ctrl->cal_data));
 	}
 #endif
-/*LGE_CHANGE_E, fixed eeprom crash, 2014-10-20, ejoon.kim@lge.com */
+/*                                                                */
 	return rc;
 }
 
@@ -941,7 +941,7 @@ static long msm_eeprom_subdev_fops_ioctl32(struct file *file, unsigned int cmd,
 }
 
 #endif
-/* LGE: verify eeprom checksum */
+/*                             */
 #define AWB_5100K_CHECKSUM_ADDR 0x06
 #define AWB_3000K_CHECKSUM_ADDR 0X388
 #define LSC_5100K_CHECKSUM_ADDR 0X380
@@ -962,9 +962,9 @@ static long msm_eeprom_subdev_fops_ioctl32(struct file *file, unsigned int cmd,
 
 #define LSC_3100K_CHECKSUM_START 0XA00
 #define LSC_3100K_CHECKSUM_END 0XD73
-/* LGE_CHANGE_S, camera id, 2015-04-07, byungsoo.moon@lge.com */
+/*                                                            */
 #define MODULE_VENDOR_ID 0x700
-/* LGE_CHANGE_E, camera id, 2015-04-07, byungsoo.moon@lge.com */
+/*                                                            */
 static int verify_eeprom_checksum(struct msm_eeprom_ctrl_t *e_ctrl)
 {
 	int i, checksum1 = 0, checksum2 = 0, checksum3 = 0;
@@ -1138,7 +1138,7 @@ static int msm_eeprom_platform_probe(struct platform_device *pdev)
 	rc = of_property_read_string(of_node, "qcom,eeprom-name",
 		&eb_info->eeprom_name);
 	pr_err("%s qcom,eeprom-name %s, rc %d\n", __func__,
-		eb_info->eeprom_name, rc);/* LGE debugging */
+		eb_info->eeprom_name, rc);/*               */
 	if (rc < 0) {
 		pr_err("%s failed %d\n", __func__, __LINE__);
 		goto board_free;
@@ -1181,12 +1181,12 @@ static int msm_eeprom_platform_probe(struct platform_device *pdev)
 		pr_info("%s: %s : eeprom data checksum success!\n", __func__,
 					e_ctrl->eboard_info->eeprom_name);
 	}
-	/* LGE_CHANGE_S, camera id, 2015-04-07, byungsoo.moon@lge.com */
+	/*                                                            */
 	if (strcmp(e_ctrl->eboard_info->eeprom_name, "imx234_eeprom") == 0) {
 		main_sensor_id = e_ctrl->cal_data.mapdata[MODULE_VENDOR_ID];
 		pr_err("%s:main_sensor_id 0x%x\n", __func__, main_sensor_id);
 	}
-	/* LGE_CHANGE_E, camera id, 2015-04-07, byungsoo.moon@lge.com */
+	/*                                                            */
 
 	rc = msm_camera_power_down(power_info, e_ctrl->eeprom_device_type,
 		&e_ctrl->i2c_client);
@@ -1215,7 +1215,7 @@ static int msm_eeprom_platform_probe(struct platform_device *pdev)
 #endif
 
 	e_ctrl->is_supported = (e_ctrl->is_supported << 1) | 1;
-	pr_err("%s X\n", __func__);//LGE for debugging
+	pr_err("%s X\n", __func__);//                 
 	return rc;
 
 power_down:
@@ -1257,7 +1257,7 @@ static int msm_eeprom_platform_remove(struct platform_device *pdev)
 	kfree(e_ctrl);
 	return 0;
 }
-/* LGE_CHANGE_S, camera id, 2015-04-07, byungsoo.moon@lge.com */
+/*                                                            */
 static ssize_t show_LGCameraMainID(struct device *dev,struct device_attribute *attr, char *buf)
 {
 	pr_err("show_LGCameraMainID: main_camera_id [%d] \n", main_sensor_id);
@@ -1294,7 +1294,7 @@ static ssize_t show_LGCameraMainID(struct device *dev,struct device_attribute *a
 }
 
 static DEVICE_ATTR(vendor_id, S_IRUGO, show_LGCameraMainID, NULL);
-/* LGE_CHANGE_E, camera id, 2015-04-07, byungsoo.moon@lge.com */
+/*                                                            */
 
 static int msm_eeprom_i2c_probe(struct i2c_client *client,
 			 const struct i2c_device_id *id)
@@ -1516,30 +1516,30 @@ static struct spi_driver msm_eeprom_spi_driver = {
 static int __init msm_eeprom_init_module(void)
 {
 	int rc = 0;
-	/* LGE_CHANGE_S, camera id, 2015-04-07, byungsoo.moon@lge.com */
+	/*                                                            */
 	struct device*	camera_vendor_id_dev;
-	/* LGE_CHANGE_E, camera id, 2015-04-07, byungsoo.moon@lge.com */
+	/*                                                            */
 	CDBG("%s E\n", __func__);
 	rc = platform_driver_probe(&msm_eeprom_platform_driver,
 		msm_eeprom_platform_probe);
 	CDBG("%s:%d platform rc %d\n", __func__, __LINE__, rc);
 	rc = spi_register_driver(&msm_eeprom_spi_driver);
 	CDBG("%s:%d spi rc %d\n", __func__, __LINE__, rc);
-	/* LGE_CHANGE_S, camera id, 2015-04-07, byungsoo.moon@lge.com */
+	/*                                                            */
 	camera_vendor_id_class = class_create(THIS_MODULE, "camera");
 	camera_vendor_id_dev = device_create(camera_vendor_id_class, NULL,
 	0, NULL, "vendor_id");
 	device_create_file(camera_vendor_id_dev, &dev_attr_vendor_id);
-	/* LGE_CHANGE_E camera id, 2015-04-07, byungsoo.moon@lge.com */
+	/*                                                           */
 	return i2c_add_driver(&msm_eeprom_i2c_driver);
 }
 
 static void __exit msm_eeprom_exit_module(void)
 {
 	platform_driver_unregister(&msm_eeprom_platform_driver);
-	/* LGE_CHANGE_S, camera id, 2015-04-07, byungsoo.moon@lge.com */
+	/*                                                            */
 	class_destroy(camera_vendor_id_class);
-	/* LGE_CHANGE_E, camera id, 2015-04-07, byungsoo.moon@lge.com */
+	/*                                                            */
 	spi_unregister_driver(&msm_eeprom_spi_driver);
 	i2c_del_driver(&msm_eeprom_i2c_driver);
 }

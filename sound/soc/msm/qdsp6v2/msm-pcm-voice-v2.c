@@ -464,7 +464,7 @@ done:
 	return ret;
 }
 
-//[Audio][BSP] junday.lee@lge.com phonememo initial code [START]
+//                                                              
 #ifdef CONFIG_SND_LGE_USE_PHONE_MEMO
 static int msm_phonememo_voice_mute_put(struct snd_kcontrol *kcontrol,
                     struct snd_ctl_elem_value *ucontrol)
@@ -489,8 +489,8 @@ static int msm_phonememo_voice_mute_put(struct snd_kcontrol *kcontrol,
     done:
     return 0;
 }
-#endif //CONFIG_SND_LGE_USE_PHONE_MEMO
-//[Audio][BSP] junday.@lge.com phonememo initial code [END]
+#endif //                             
+//                                                         
 
 static const char const *tty_mode[] = {"OFF", "HCO", "VCO", "FULL"};
 static const struct soc_enum msm_tty_mode_enum[] = {
@@ -604,12 +604,12 @@ static int msm_voice_cvd_version_get(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 static struct snd_kcontrol_new msm_voice_controls[] = {
-//[Audio][BSP] junday.lee@lge.com phonememo initial code [START]
+//                                                              
 #ifdef CONFIG_SND_LGE_USE_PHONE_MEMO
 	SOC_SINGLE_MULTI_EXT("Voice Tx Mute Phonememo", SND_SOC_NOPM, 0, VSID_MAX,
 	            0, 3, NULL, msm_phonememo_voice_mute_put),
-#endif //CONFIG_SND_LGE_USE_PHONE_MEMO
-//[Audio][BSP] junday.@lge.com phonememo initial code [END]
+#endif //                             
+//                                                         
 	SOC_SINGLE_MULTI_EXT("Voice Rx Device Mute", SND_SOC_NOPM, 0, VSID_MAX,
 				0, 3, NULL, msm_voice_rx_device_mute_put),
 	SOC_SINGLE_MULTI_EXT("Voice Tx Device Mute", SND_SOC_NOPM, 0, VSID_MAX,

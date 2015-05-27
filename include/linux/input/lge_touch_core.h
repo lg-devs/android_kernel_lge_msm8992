@@ -729,7 +729,6 @@ enum {
 	SET_NO_SLEEP,
 	SET_EARLY_RESET,
 	SET_POWER_OFF,
-	SET_DEEP_ACTIVE,
 };
 
 #define LGE_TOUCH_NAME		"lge_touch"

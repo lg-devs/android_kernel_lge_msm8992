@@ -1394,13 +1394,13 @@ static int msm_isp_axi_wait_for_cfg_done(struct vfe_device *vfe_dev,
 	for (i = 0; i < VFE_SRC_MAX; i++) {
 		if (src_mask & (1 << i)) {
 			if (vfe_dev->axi_data.stream_update[i] > 0) {
-/*LGE_CHANGE_S, add QCT_PATCH about stability after Post CS , 2015-03-31, yousung.kang@lge.com */				
+/*                                                                                             */				
 				pr_err("%s:Stream Update in progress. cnt %d\n",
 					__func__,
 					vfe_dev->axi_data.stream_update[i]);
 				spin_unlock_irqrestore(
 					&vfe_dev->shared_data_lock, flags);
-/*LGE_CHANGE_E, add QCT_PATCH about stability after Post CS , 2015-03-31, yousung.kang@lge.com */				
+/*                                                                                             */				
 				return -EINVAL;
 			}
 			vfe_dev->axi_data.stream_update[i] = regUpdateCnt;
@@ -1803,10 +1803,10 @@ static int msm_isp_stop_axi_stream(struct vfe_device *vfe_dev,
 				vfe_dev->hw_info->vfe_ops.core_ops.reg_update(
 					vfe_dev,
 					SRC_TO_INTF(stream_info->stream_src));
-				mutex_unlock(&vfe_dev->core_mutex);    /*LGE_CHANGE, add QCT_PATCH about stability after Post CS , 2015-03-31, yousung.kang@lge.com */
+				mutex_unlock(&vfe_dev->core_mutex);    /*                                                                                           */
 				rc = msm_isp_axi_wait_for_cfg_done(vfe_dev,
 					camif_update, src_mask, 1);
-				mutex_lock(&vfe_dev->core_mutex);     /*LGE_CHANGE, add QCT_PATCH about stability after Post CS , 2015-03-31, yousung.kang@lge.com */
+				mutex_lock(&vfe_dev->core_mutex);     /*                                                                                           */
 				if (rc < 0)
 					pr_err("cfg done failed\n");
 				rc = -EBUSY;
@@ -2210,7 +2210,7 @@ void msm_isp_process_axi_irq(struct vfe_device *vfe_dev,
 
 			ISP_DBG("%s: vfe_id %d stream id %x frame id: 0x%x\n", __func__,
                           vfe_dev->pdev->id,
-                          stream_info->stream_id, stream_info->frame_id); /*LGE_CHANGE, change log level from pr_err , 2015-03-14, ejoon.kim@lge.com */
+                          stream_info->stream_id, stream_info->frame_id); /*                                                                         */
 			stream_info->frame_id++;
 
 			if (stream_info->stream_type == BURST_STREAM) {

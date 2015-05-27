@@ -1351,7 +1351,7 @@ static void msm_ispif_release(struct ispif_device *ispif)
 	}
 
 	/* make sure no streaming going on */
-	if (ispif->fs_vfe && regulator_is_enabled(ispif->fs_vfe)) {	//LGE_CHANGE, vdd_vfe to check if vfe is up
+	if (ispif->fs_vfe && regulator_is_enabled(ispif->fs_vfe)) {	//                                         
 		msm_ispif_reset(ispif);
 		msm_ispif_reset_hw(ispif);/*LGCHANGE,QCT Patch for camif error 15.03.24*/
 	} else
@@ -1570,12 +1570,12 @@ static int ispif_probe(struct platform_device *pdev)
 			pr_err("%s: no valid csi_mux region\n", __func__);
 	}
 
-	//LGE_CHANGE_S, vdd_vfe to check if vfe is up
+	//                                           
         ispif->fs_vfe = regulator_get(&pdev->dev, "vdd_vfe");
 
 	if (ispif->fs_vfe == NULL)
 		pr_err("%s: gdsc_vfe is null\n", __func__);
-	//LGE_CHANGE_E, vdd_vfe to check if vfe is up
+	//                                           
 
 	v4l2_subdev_init(&ispif->msm_sd.sd, &msm_ispif_subdev_ops);
 	ispif->msm_sd.sd.internal_ops = &msm_ispif_internal_ops;

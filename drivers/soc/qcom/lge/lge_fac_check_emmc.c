@@ -49,11 +49,11 @@ static struct platform_device factory_check_emmc_platrom_device = {
 	}
 };
 /*
-void __init lge_add_factory_check_emmc_devices(void)
-{
-	pr_info(" PRE_SELFD_DEBUG : %s\n", __func__);
-	platform_device_register(&factory_check_emmc_platrom_device);
-}
+                                                    
+ 
+                                              
+                                                              
+ 
 */
 static int __init factory_check_emmc_init(void)
 {

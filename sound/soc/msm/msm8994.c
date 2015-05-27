@@ -1942,7 +1942,6 @@ static int msm_snd_get_ext_clk_cnt(void)
 
 static int msm_audrx_init(struct snd_soc_pcm_runtime *rtd)
 {
-    int ret;
 	int err;
 	void *config_data;
 	struct snd_soc_codec *codec = rtd->codec;
@@ -2123,10 +2122,7 @@ static int msm_audrx_init(struct snd_soc_pcm_runtime *rtd)
 			__func__, err);
 		goto out;
 	}
-    ret = tomtom_enable_qfuse_sensing(rtd->codec);
-
-    if(ret)
-        panic("[audio bsp] tomtom_enable_qfuse_sensing failed\n");
+	tomtom_enable_qfuse_sensing(rtd->codec);
 	err = msm_snd_enable_codec_ext_clk(rtd->codec, 0, false);
 	if (IS_ERR_VALUE(err)) {
 		pr_err("%s: Failed to disable mclk, err = 0x%x\n",
@@ -3323,10 +3319,10 @@ static struct snd_soc_dai_link msm8994_common_dai_links[] = {
 };
 
 #ifndef CONFIG_SND_DISABLE_DUMMY_DAI
-/* DAI LINK added by lge should be here */
+/*                                      */
 /* even if functions is defeatured, dummy dai should be there */
 /* if you need to create new dai link, u must add new one behind last one */
-/* num of qct dia should be below LGE_DAI_LINK_ID_BASE */
+/*                                                     */
 
 #define LGE_DAI_LINK_ID_BASE	80
 
@@ -3740,7 +3736,7 @@ static int msm8994_asoc_machine_probe(struct platform_device *pdev)
 	}
 
 #ifndef CONFIG_SND_DISABLE_DUMMY_DAI
-	/* Filled dummy dai behind LGE_DAI_LINK_ID_BASE */
+	/*                                              */
 	{
 		static char dummy_dai_name[LGE_DAI_LINK_ID_BASE][50];
 		int i;
@@ -3764,7 +3760,7 @@ static int msm8994_asoc_machine_probe(struct platform_device *pdev)
 			msm8994_lge_dai_link[1].codec_name = "tas2552-codec.5-0041";
 	}
 #endif
-	/* Append DAIs added by LGE in DAI LINK*/
+	/*                                     */
 	memcpy(msm8994_dai_links + card->num_links,
 		msm8994_lge_dai_link, sizeof(msm8994_lge_dai_link));
 	card->dai_link	= msm8994_dai_links;

@@ -535,17 +535,11 @@ static int tas2552_set_dai_sysclk(struct snd_soc_dai *dai, int clk_id,
 	return 0;
 }
 
-static int tas2552_mute(struct snd_soc_dai *dai, int mute, int direction)
+static int tas2552_mute(struct snd_soc_dai *dai, int mute)
 {
 	u8 cfg1_reg;
 
 	dev_dbg(dai->dev, "%s: %d\n", __func__, mute);
-
-	if(direction)
-		return 0;
-
-	if(!mute)
-		usleep(1000);
 
 	cfg1_reg = tas2552_i2c_read(TAS2552_CFG_1);
 	if (mute)
@@ -564,9 +558,6 @@ static int tas2552_startup(struct snd_pcm_substream *substream,
 	struct snd_soc_codec *codec = dai->codec;
 	u8 cfg2_reg;
 
-	if(substream->stream == 1)
-		return 0;
-
 	dev_dbg(dai->dev, "%s:\n", __func__);
 
 	tas2552_get_client(codec->dev);
@@ -575,6 +566,7 @@ static int tas2552_startup(struct snd_pcm_substream *substream,
 	    printk("[audio bsp] tas2552 registers was broken at the startup!!!!!!! so re-initialize \n");
 	    tas2552_init(codec);
 	}
+
 
 	tas2552_sw_shutdown(1);
 	tas2552_power(codec, 1);
@@ -594,9 +586,6 @@ static void tas2552_shutdown(struct snd_pcm_substream *substream,
 {
 	struct snd_soc_codec *codec = dai->codec;
 
-	if(substream->stream == 1)
-		return;
-
 	dev_dbg(dai->dev, "%s:\n", __func__);
 
 	tas2552_get_client(codec->dev);
@@ -611,7 +600,7 @@ static struct snd_soc_dai_ops tas2552_speaker_dai_ops = {
 	.set_fmt	= tas2552_set_dai_fmt,
 	.startup	= tas2552_startup,
 	.shutdown	= tas2552_shutdown,
-	.mute_stream = tas2552_mute,
+	.digital_mute = tas2552_mute,
 };
 
 /* Formats supported by TAS2552 driver. */

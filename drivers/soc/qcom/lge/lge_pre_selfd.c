@@ -50,11 +50,11 @@ static struct platform_device pre_selfd_platrom_device = {
 	}
 };
 /*
-void __init lge_add_pre_selfd_devices(void)
-{
-	pr_info(" PRE_SELFD_DEBUG : %s\n", __func__);
-	platform_device_register(&pre_selfd_platrom_device);
-}
+                                           
+ 
+                                              
+                                                     
+ 
 */
 static int __init pre_selfd_init(void)
 {

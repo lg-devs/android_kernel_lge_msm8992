@@ -363,23 +363,23 @@ int tunerbb_drv_fc8300_get_oneseg_antenna(int ant, int ber, int cn, s32 brd_type
                     antlvl = ant;
             break;
             case 1:
-                if(ber > 750)
+                if((ber > 750) || (cn < 500))
                     antlvl = ant = 0;
-                if(ber < 300)
+                if((ber < 300) || (cn > 700))
                     antlvl = ant = 2;
                 else
                     antlvl = ant;
             break;
             case 2:
-                if(ber > 400)
+                if((ber > 400) || (600 > cn))
                     antlvl = ant = 1;
-                if(ber < 50)
+                if((ber < 50) || (900 < cn))
                     antlvl = ant = 3;
                 else
                     antlvl = ant;
             break;
             case 3:
-                if(ber > 100)
+                if((ber > 100) || (700 > cn))
                     antlvl = ant = 2;
                 else
                     antlvl = ant;

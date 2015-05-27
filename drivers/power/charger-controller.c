@@ -1838,7 +1838,7 @@ DEVICE_ATTR(at_chcomp, 0644, at_chg_complete_show, at_chg_complete_store);
 DEVICE_ATTR(at_pmrst, 0440, at_pmic_reset_show, NULL);
 #endif
 
-/* #ifdef CONFIG_LGE_BATTERY_PROP */
+/*                                */
 #define DEFAULT_FAKE_BATT_CAPACITY		50
 #ifdef CONFIG_LGE_PM_FACTORY_PSEUDO_BATTERY
 #define LGE_FAKE_BATT_PRES		1
@@ -2229,7 +2229,7 @@ if (cc->wireless_psy != NULL) {
 	cc->current_iusb_changed_by_cc = 0;
 	cc->wireless_lcs = -1;
 	cc->ibat_limit_lcs = -1;
-	/* initial value needed if CONFIG_LGE_SET_INIT_CURRENT is not used */
+	/*                                                                 */
 	for (i=0; i<MAX_IBAT_NODE; i++)
 		cc->current_ibat_limit[i] = -1;
 

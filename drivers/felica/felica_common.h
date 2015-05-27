@@ -32,7 +32,7 @@ extern "C" {
 //#include <linux/gpio.h>
 //#include <mach/gpio.h>
 //#include <mach/socinfo.h>
-//#include <mach/board_lge.h>/*lge_get_board_revno*/
+//                                                  
 
 /*
  *  DEFINE

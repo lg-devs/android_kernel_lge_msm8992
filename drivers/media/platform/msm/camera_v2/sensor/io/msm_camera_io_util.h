@@ -30,8 +30,8 @@ struct msm_gpio_set_tbl {
 	unsigned long flags;
 	uint32_t delay;
 };
-/* LGE_CHANGE, camera stability task, Changed to inline function for RTB logging */
-#ifdef CONFIG_MSM_RTB//CONFIG_LGE_CAMERA_RTB_DEBUG
+/*                                                                               */
+#ifdef CONFIG_MSM_RTB//                           
 static inline void msm_camera_io_w(u32 data, void __iomem *addr)
 {
 	writel_relaxed((data), (addr));

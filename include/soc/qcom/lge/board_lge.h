@@ -64,7 +64,7 @@ enum lge_boot_mode_type {
 	LGE_BOOT_MODE_PIF_56K,
 	LGE_BOOT_MODE_PIF_130K,
 	LGE_BOOT_MODE_PIF_910K,
-	LGE_BOOT_MODE_MINIOS    /* LGE_UPDATE for MINIOS2.0 */
+	LGE_BOOT_MODE_MINIOS    /*                          */
 };
 
 enum lge_boot_mode_type lge_get_boot_mode(void);
@@ -253,13 +253,13 @@ extern void lge_uart_console_set_enabled(int enabled);
 extern unsigned int lge_uart_console_get_ready(void);
 extern void lge_uart_console_set_ready(unsigned int ready);
 
-/* real device enabler (or disabler)
- * control uart console device to enable/disable
- * NOTE @PARAM::enable should be selected by uart console enable/disable policy
- * which can be known by lge_uart_console_should_enable_on_xxx.
- * @PARAM::enable
- * zero : disabled
- * non-zero : enable
+/*                                  
+                                                
+                                                                               
+                                                               
+                 
+                  
+                    
  */
 extern int msm_serial_set_uart_console(int enable);
 #endif

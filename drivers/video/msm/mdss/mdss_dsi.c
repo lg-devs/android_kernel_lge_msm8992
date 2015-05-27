@@ -41,7 +41,6 @@ int proxy_sensor_status;
 int panel_not_connected;
 bool first_touch_power_on = false;
 int SIC_is_doze = 1;
-int jdi_deep_sleep = 0;
 #endif
 
 #if defined(CONFIG_MFD_P1_DSV) && defined(CONFIG_LGE_P1_DSV)
@@ -823,14 +822,10 @@ int mdss_dsi_on(struct mdss_panel_data *pdata)
 		}
 	} else if (ctrl_pdata->panel_data.panel_info.panel_type
 			== JDI_INCELL_CMD_PANEL) {
-		if (!ctrl_pdata->ndx) {
-			if (ctrl_pdata->touch_driver_registered) {
-				if(jdi_deep_sleep == 0)
-					touch_notifier_call_chain(
-						LCD_EVENT_TOUCH_LPWG_OFF, NULL);
-			}
-			jdi_deep_sleep = 0;
-		}
+		if (!ctrl_pdata->ndx)
+			if (ctrl_pdata->touch_driver_registered)
+				touch_notifier_call_chain(
+					LCD_EVENT_TOUCH_LPWG_OFF, NULL);
 	} else if (ctrl_pdata->panel_data.panel_info.panel_type
 			== LGD_SIC_INCELL_CMD_PANEL) {
 		if (ctrl_pdata->ndx) {
@@ -1543,15 +1538,6 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 			lgd_deep_sleep(ctrl_pdata,
 				       DEEP_SLEEP_TO_LPWG,
 				      DEEP_SLEEP_TO_ACTIVE);
-		} else if (ctrl_pdata->panel_data.panel_info.panel_type
-				== JDI_INCELL_CMD_PANEL && !ctrl_pdata->ndx) {
-			lgd_rsp_lcd_on_off = 1;
-			if (jdi_deep_sleep == 1) {
-				int param = 4;
-				touch_notifier_call_chain(
-				LCD_EVENT_TOUCH_SLEEP_STATUS,
-					(void *)&param);
-			}
 		}
 #endif
 		rc = mdss_dsi_on(pdata);
@@ -1619,20 +1605,9 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 						      LPWG_TO_DEEP_SLEEP);
 				}
 				lgd_rsp_lcd_on_off = 0;
-			} else if (ctrl_pdata->panel_data.panel_info.panel_type
-				== JDI_INCELL_CMD_PANEL) {
-				msleep(50);
-				if (jdi_deep_sleep == 1) {
-					int param = 0;
-					pr_info("%s: ACTIVE to DEEP\n",
-						       __func__);
-					touch_notifier_call_chain(
-					LCD_EVENT_TOUCH_SLEEP_STATUS,
-						(void *)&param);
-				}
-				lgd_rsp_lcd_on_off = 0;
 			}
-			else if (ctrl_pdata->panel_data.panel_info.panel_type
+
+			if (ctrl_pdata->panel_data.panel_info.panel_type
 				== LGD_SIC_INCELL_CMD_PANEL)
 				SIC_is_doze = 2;
 		}
@@ -1795,7 +1770,6 @@ static int lcd_notifier_callback(struct notifier_block *this,
 					unsigned long event, void *data)
 {
 	int mode  = 0;
-	int param;
 	struct mdss_dsi_ctrl_pdata *ctrl_pdata = container_of(this,
 		struct mdss_dsi_ctrl_pdata, notif);
 
@@ -1828,8 +1802,7 @@ static int lcd_notifier_callback(struct notifier_block *this,
 					}
 					dw8768_fast_discharge();
 					pr_err("%s: At PROXY_NEAR event clk off, ndx: %d\n", __func__, ctrl_pdata->ndx);
-				} else if (ctrl_pdata->panel_data.panel_info.panel_type
-					== LGD_INCELL_CMD_PANEL) {
+				} else {
 					proxy_sensor_status = PROXY_NEAR;
 					pr_err("%s: TOUCH_EVENT_PROXY_STATUS received : PROXY_NEAR\n",
 							__func__);
@@ -1838,19 +1811,6 @@ static int lcd_notifier_callback(struct notifier_block *this,
 						lgd_deep_sleep(ctrl_pdata,
 							LPWG_TO_DEEP_SLEEP,
 						       LPWG_TO_DEEP_SLEEP);
-					}
-				} else if (ctrl_pdata->panel_data.panel_info.panel_type
-					== JDI_INCELL_CMD_PANEL) {
-					proxy_sensor_status = PROXY_NEAR;
-					pr_err("%s: TOUCH_EVENT_PROXY_STATUS received : PROXY_NEAR\n",
-							__func__);
-					if (lgd_rsp_lcd_on_off == 0) {
-						param = 0;
-						pr_info("%s: LPWG to DEEP\n", __func__);
-						jdi_deep_sleep = 1;
-						touch_notifier_call_chain(
-						LCD_EVENT_TOUCH_SLEEP_STATUS,
-							(void *)&param);
 					}
 				}
 				break;
@@ -1871,8 +1831,7 @@ static int lcd_notifier_callback(struct notifier_block *this,
 						mdss_dsi_stub_cmds_send(ctrl_pdata, &ctrl_pdata->clk_on_cmds);
 					}
 					pr_err("%s: At PROXY_FAR event clk on, ndx: %d\n", __func__, ctrl_pdata->ndx);
-				} else if (ctrl_pdata->panel_data.panel_info.panel_type
-					== LGD_INCELL_CMD_PANEL) {
+				} else {
 					proxy_sensor_status = PROXY_FAR;
 					pr_err("%s: TOUCH_EVENT_PROXY_STATUS received : PROXY_FAR\n",
 							__func__);
@@ -1883,21 +1842,6 @@ static int lcd_notifier_callback(struct notifier_block *this,
 							DEEP_SLEEP_TO_LPWG,
 						       DEEP_SLEEP_TO_LPWG);
 					}
-				} else if (ctrl_pdata->panel_data.panel_info.panel_type
-					== JDI_INCELL_CMD_PANEL) {
-					proxy_sensor_status = PROXY_FAR;
-					pr_err("%s: TOUCH_EVENT_PROXY_STATUS received : PROXY_FAR\n",
-							__func__);
-					if (lgd_rsp_lcd_on_off == 0) {
-						param = 1;
-						pr_info("%s: DEEP SLEEP to LPWG\n",
-							       __func__);
-						jdi_deep_sleep = 0;
-						touch_notifier_call_chain(
-						LCD_EVENT_TOUCH_SLEEP_STATUS,
-							(void *)&param);
-					}
-
 				}
 				break;
 			default:
